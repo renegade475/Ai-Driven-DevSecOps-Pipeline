@@ -43,20 +43,17 @@ jobs:
       - name: Ensure results dir
         run: mkdir -p results
 
-      - name: Run OWASP ZAP (Docker) and save report to mounted dir
+      - name: Run OWASP ZAP (Docker)
         env:
           ZAP_TARGET: ${{ secrets.ZAP_TARGET }}
         run: |
-          # Map the container's /zap/wrk to the runner's ./results directory so the report is persisted.
           docker run --rm -v $(pwd)/results:/zap/wrk owasp/zap2docker-stable \
             zap-baseline.py -t "$ZAP_TARGET" -J /zap/wrk/zap_report.json || true
 
-      - name: Show results (for debugging)
+      - name: List results
         run: |
-          echo "Listing results directory:"
+          echo "Results directory:"
           ls -al results || true
-          echo "If zap_report.json exists, show its start:"
-          head -n 200 results/zap_report.json || true
 
       - name: Upload ZAP artifact
         uses: actions/upload-artifact@v4
@@ -75,22 +72,16 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: semgrep-results
-          path: results/semgrep
+          path: aggregated
 
       - name: Download ZAP artifact
         uses: actions/download-artifact@v4
         with:
           name: zap-results
-          path: results/zap
+          path: aggregated
 
-      - name: Aggregate results (basic)
-        run: |
-          mkdir -p aggregated
-          # move or copy if present
-          if [ -f results/semgrep/semgrep.json ]; then cp results/semgrep/semgrep.json aggregated/semgrep.json; fi
-          if [ -f results/zap_report.json ]; then cp results/zap_report.json aggregated/zap.json; fi
-          echo "Aggregated files:"
-          ls -al aggregated || true
+      - name: List aggregated
+        run: ls -al aggregated
 
       - name: Upload aggregated artifact
         uses: actions/upload-artifact@v4
