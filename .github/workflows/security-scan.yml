@@ -40,16 +40,60 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Run OWASP ZAP
+      - name: Ensure results dir
+        run: mkdir -p results
+
+      - name: Run OWASP ZAP (Docker) and save report to mounted dir
         env:
           ZAP_TARGET: ${{ secrets.ZAP_TARGET }}
         run: |
-          mkdir -p results
-          docker run --rm -v $(pwd)/results:/zap/results owasp/zap2docker-stable \
-           zap-baseline.py -t "$ZAP_TARGET" -J /zap/wrk/zap_report.json || true
+          # Map the container's /zap/wrk to the runner's ./results directory so the report is persisted.
+          docker run --rm -v $(pwd)/results:/zap/wrk owasp/zap2docker-stable \
+            zap-baseline.py -t "$ZAP_TARGET" -J /zap/wrk/zap_report.json || true
+
+      - name: Show results (for debugging)
+        run: |
+          echo "Listing results directory:"
+          ls -al results || true
+          echo "If zap_report.json exists, show its start:"
+          head -n 200 results/zap_report.json || true
 
       - name: Upload ZAP artifact
         uses: actions/upload-artifact@v4
         with:
           name: zap-results
-          path: results/zap.json
+          path: results/zap_report.json
+
+  aggregate_and_save:
+    runs-on: ubuntu-latest
+    needs: [semgrep_scan, zap_scan]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Semgrep artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: semgrep-results
+          path: results/semgrep
+
+      - name: Download ZAP artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: zap-results
+          path: results/zap
+
+      - name: Aggregate results (basic)
+        run: |
+          mkdir -p aggregated
+          # move or copy if present
+          if [ -f results/semgrep/semgrep.json ]; then cp results/semgrep/semgrep.json aggregated/semgrep.json; fi
+          if [ -f results/zap_report.json ]; then cp results/zap_report.json aggregated/zap.json; fi
+          echo "Aggregated files:"
+          ls -al aggregated || true
+
+      - name: Upload aggregated artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aggregated-results
+          path: aggregated
