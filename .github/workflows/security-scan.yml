@@ -178,22 +178,22 @@ jobs:
           echo "=== ZAP Scan Results ==="
           if [ -f results/zap_report.json ]; then
             echo "✅ ZAP scan completed"
-            python3 -c "
+            python3 -c '
 import json
 try:
-    with open('results/zap_report.json') as f:
+    with open("results/zap_report.json") as f:
         data = json.load(f)
-    sites = data.get('site', [])
+    sites = data.get("site", [])
     if sites:
-        alerts = sites[0].get('alerts', [])
-        print(f'Found {len(alerts)} alerts')
+        alerts = sites[0].get("alerts", [])
+        print(f"Found {len(alerts)} alerts")
         for alert in alerts[:5]:
-            print(f\"  - {alert.get('name', 'Unknown')}: {alert.get('riskdesc', 'Unknown risk')}\")
+            print(f"  - {alert.get(\"name\", \"Unknown\")}: {alert.get(\"riskdesc\", \"Unknown risk\")}")
     else:
-        print('No sites scanned')
+        print("No sites scanned")
 except Exception as e:
-    print(f'Could not parse results: {e}')
-            " || echo "Results file exists but could not be parsed"
+    print(f"Could not parse results: {e}")
+            ' || echo "Results file exists but could not be parsed"
           else
             echo "⚠️ No ZAP results found"
             ls -la results/ || true
