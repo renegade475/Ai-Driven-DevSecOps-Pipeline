@@ -1,0 +1,112 @@
+{
+    "site": [
+        {
+            "@name": "http://localhost:5000",
+            "@host": "localhost",
+            "@port": "5000",
+            "@ssl": "false",
+            "alerts": [
+                {
+                    "pluginid": "40018",
+                    "alertRef": "40018",
+                    "alert": "SQL Injection",
+                    "name": "SQL Injection",
+                    "riskcode": "3",
+                    "confidence": "2",
+                    "riskdesc": "High (Medium)",
+                    "desc": "SQL injection may be possible.",
+                    "instances": [
+                        {
+                            "uri": "http://localhost:5000/login",
+                            "method": "POST",
+                            "param": "username",
+                            "attack": "' OR '1'='1",
+                            "evidence": "error in your SQL syntax"
+                        }
+                    ],
+                    "count": "1",
+                    "solution": "Use prepared statements and parameterized queries.",
+                    "reference": "https://owasp.org/www-community/attacks/SQL_Injection",
+                    "cweid": "89",
+                    "wascid": "19",
+                    "sourceid": "1"
+                },
+                {
+                    "pluginid": "40012",
+                    "alertRef": "40012",
+                    "alert": "Cross Site Scripting (Reflected)",
+                    "name": "Cross Site Scripting (Reflected)",
+                    "riskcode": "3",
+                    "confidence": "2",
+                    "riskdesc": "High (Medium)",
+                    "desc": "Cross-site Scripting (XSS) is possible.",
+                    "instances": [
+                        {
+                            "uri": "http://localhost:5000/search",
+                            "method": "POST",
+                            "param": "search",
+                            "attack": "<script>alert(1)</script>",
+                            "evidence": "<script>alert(1)</script>"
+                        }
+                    ],
+                    "count": "1",
+                    "solution": "Encode all user input before rendering in HTML.",
+                    "reference": "https://owasp.org/www-community/attacks/xss/",
+                    "cweid": "79",
+                    "wascid": "8",
+                    "sourceid": "1"
+                },
+                {
+                    "pluginid": "90020",
+                    "alertRef": "90020",
+                    "alert": "Remote OS Command Injection",
+                    "name": "Remote OS Command Injection",
+                    "riskcode": "3",
+                    "confidence": "2",
+                    "riskdesc": "High (Medium)",
+                    "desc": "Command injection may be possible.",
+                    "instances": [
+                        {
+                            "uri": "http://localhost:5000/ping",
+                            "method": "POST",
+                            "param": "host",
+                            "attack": "127.0.0.1; ls",
+                            "evidence": "total"
+                        }
+                    ],
+                    "count": "1",
+                    "solution": "Avoid using shell commands with user input.",
+                    "reference": "https://owasp.org/www-project-web-security-testing-guide/",
+                    "cweid": "78",
+                    "wascid": "31",
+                    "sourceid": "1"
+                },
+                {
+                    "pluginid": "10202",
+                    "alertRef": "10202",
+                    "alert": "Absence of Anti-CSRF Tokens",
+                    "name": "Absence of Anti-CSRF Tokens",
+                    "riskcode": "2",
+                    "confidence": "2",
+                    "riskdesc": "Medium (Medium)",
+                    "desc": "No Anti-CSRF tokens were found in a HTML submission form.",
+                    "instances": [
+                        {
+                            "uri": "http://localhost:5000/transfer",
+                            "method": "POST",
+                            "param": "",
+                            "attack": "",
+                            "evidence": "<form method=\"POST\">"
+                        }
+                    ],
+                    "count": "1",
+                    "solution": "Implement CSRF tokens for all state-changing operations.",
+                    "reference": "https://owasp.org/www-community/attacks/csrf",
+                    "cweid": "352",
+                    "wascid": "9",
+                    "sourceid": "1"
+                }
+            ]
+        }
+    ]
+}

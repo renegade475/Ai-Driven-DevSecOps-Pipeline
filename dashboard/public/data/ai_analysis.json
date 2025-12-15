@@ -1,0 +1,415 @@
+{
+  "report_id": "ai_analysis_20251215_052111",
+  "generated_at": "2025-12-15T05:21:11.396000",
+  "policy": {
+    "name": "Enterprise Security Policy",
+    "version": "1.0"
+  },
+  "summary": {
+    "total_vulnerabilities": 5,
+    "filtered_vulnerabilities": 5,
+    "false_positives": 0,
+    "false_positive_rate": 0.0,
+    "by_severity": {
+      "CRITICAL": 3,
+      "HIGH": 1,
+      "MEDIUM": 1,
+      "LOW": 0,
+      "INFO": 0
+    },
+    "by_source": {
+      "SAST": 1,
+      "DAST": 4
+    },
+    "risk_statistics": {
+      "average_risk_score": 0.8,
+      "max_risk_score": 1.0,
+      "min_risk_score": 0.46,
+      "high_risk_count": 4,
+      "medium_risk_count": 1,
+      "low_risk_count": 0
+    },
+    "priority_statistics": {
+      "priority_1": 2,
+      "priority_2": 2,
+      "priority_3": 0,
+      "priority_4": 1,
+      "priority_5": 0,
+      "low_effort": 0,
+      "medium_effort": 5,
+      "high_effort": 0,
+      "total_prioritized": 5
+    },
+    "top_priorities_count": 5
+  },
+  "vulnerabilities": {
+    "total": 5,
+    "filtered": 5,
+    "top_priorities": 5,
+    "by_severity": {
+      "CRITICAL": 3,
+      "HIGH": 1,
+      "MEDIUM": 1,
+      "LOW": 0,
+      "INFO": 0
+    },
+    "by_source": {
+      "SAST": 1,
+      "DAST": 4,
+      "MANUAL": 0
+    },
+    "by_type": {
+      "OTHER": 5
+    }
+  },
+  "top_priorities": [
+    {
+      "id": "86595c99f9f3fc1d",
+      "title": "SQL Injection",
+      "description": "SQL injection may be possible.",
+      "severity": "CRITICAL",
+      "source": "DAST",
+      "location": {
+        "file": "",
+        "line_start": null,
+        "line_end": null,
+        "url": "http://localhost:5000/login",
+        "method": "POST",
+        "parameter": "username"
+      },
+      "cwe": "CWE-89",
+      "owasp": "A03:2021-Injection",
+      "confidence": 0.7,
+      "risk_score": 1.0,
+      "priority": 1,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "SQL Injection Remediation:\n1. Use parameterized queries (prepared statements) instead of string concatenation\n2. Use ORM frameworks with built-in protection\n3. Implement input validation and sanitization\n4. Apply principle of least privilege for database accounts\n5. Use stored procedures with parameterized inputs",
+        "code_example": "# Vulnerable code:\nquery = f\"SELECT * FROM users WHERE id = {user_id}\"\ncursor.execute(query)\n\n# Secure code:\nquery = \"SELECT * FROM users WHERE id = ?\"\ncursor.execute(query, (user_id,))",
+        "effort": "MEDIUM",
+        "sla_days": 7
+      },
+      "tags": [
+        "40018"
+      ],
+      "references": [
+        "https://owasp.org/www-community/attacks/SQL_Injection"
+      ]
+    },
+    {
+      "id": "e5a0a9bbcce82b6f",
+      "title": "Remote OS Command Injection",
+      "description": "Command injection may be possible.",
+      "severity": "CRITICAL",
+      "source": "DAST",
+      "location": {
+        "file": "",
+        "line_start": null,
+        "line_end": null,
+        "url": "http://localhost:5000/ping",
+        "method": "POST",
+        "parameter": "host"
+      },
+      "cwe": "CWE-78",
+      "owasp": "A03:2021-Injection",
+      "confidence": 0.7,
+      "risk_score": 0.955,
+      "priority": 1,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "Command Injection Remediation:\n1. Avoid shell=True in subprocess calls\n2. Use subprocess with argument lists instead of shell commands\n3. Validate and whitelist allowed commands\n4. Use libraries instead of shell commands when possible\n5. Implement strict input validation",
+        "code_example": "# Vulnerable code:\nsubprocess.call(f\"ls {user_path}\", shell=True)\n\n# Secure code:\nsubprocess.call([\"ls\", user_path])",
+        "effort": "MEDIUM",
+        "sla_days": 7
+      },
+      "tags": [
+        "90020"
+      ],
+      "references": [
+        "https://owasp.org/www-project-web-security-testing-guide/"
+      ]
+    },
+    {
+      "id": "004b1d8b6a64f4a1",
+      "title": "Cross Site Scripting (Reflected)",
+      "description": "Cross-site Scripting (XSS) is possible.",
+      "severity": "CRITICAL",
+      "source": "DAST",
+      "location": {
+        "file": "",
+        "line_start": null,
+        "line_end": null,
+        "url": "http://localhost:5000/search",
+        "method": "POST",
+        "parameter": "search"
+      },
+      "cwe": "CWE-79",
+      "owasp": "A03:2021-Injection",
+      "confidence": 0.7,
+      "risk_score": 0.83,
+      "priority": 2,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "Cross-Site Scripting (XSS) Remediation:\n1. Enable auto-escaping in template engines\n2. Use Content Security Policy (CSP) headers\n3. Sanitize user input before rendering\n4. Use framework-provided escaping functions\n5. Validate and encode output based on context (HTML, JavaScript, URL)",
+        "code_example": "# Vulnerable code:\nreturn render_template_string(f\"<h1>Hello {user_input}</h1>\")\n\n# Secure code:\nfrom markupsafe import escape\nreturn render_template_string(f\"<h1>Hello {escape(user_input)}</h1>\")",
+        "effort": "MEDIUM",
+        "sla_days": 14
+      },
+      "tags": [
+        "40012"
+      ],
+      "references": [
+        "https://owasp.org/www-community/attacks/xss/"
+      ]
+    },
+    {
+      "id": "3f39c2cfc0d22f48",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "No Anti-CSRF tokens were found in a HTML submission form.",
+      "severity": "HIGH",
+      "source": "DAST",
+      "location": {
+        "file": "",
+        "line_start": null,
+        "line_end": null,
+        "url": "http://localhost:5000/transfer",
+        "method": "POST",
+        "parameter": ""
+      },
+      "cwe": "CWE-352",
+      "owasp": "A01:2021-Broken Access Control",
+      "confidence": 0.7,
+      "risk_score": 0.755,
+      "priority": 2,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "CSRF Remediation:\n1. Implement CSRF tokens for state-changing operations\n2. Use SameSite cookie attribute\n3. Verify Origin and Referer headers\n4. Use framework-provided CSRF protection\n5. Require re-authentication for sensitive operations",
+        "code_example": "# Vulnerable code:\n@app.route('/transfer', methods=['POST'])\ndef transfer():\n    amount = request.form['amount']\n    process_transfer(amount)\n\n# Secure code:\nfrom flask_wtf.csrf import CSRFProtect\ncsrf = CSRFProtect(app)\n\n@app.route('/transfer', methods=['POST'])\n@csrf.protect\ndef transfer():\n    amount = request.form['amount']\n    process_transfer(amount)",
+        "effort": "MEDIUM",
+        "sla_days": 14
+      },
+      "tags": [
+        "10202"
+      ],
+      "references": [
+        "https://owasp.org/www-community/attacks/csrf"
+      ]
+    },
+    {
+      "id": "832bbea8bbfdf42d",
+      "title": "semgrep-rules.python-bad-input",
+      "description": "Using input() may lead to injection if not sanitized",
+      "severity": "MEDIUM",
+      "source": "SAST",
+      "location": {
+        "file": "Vulnerable_app/app.py",
+        "line_start": 2,
+        "line_end": 2,
+        "url": null,
+        "method": null,
+        "parameter": null
+      },
+      "cwe": null,
+      "owasp": null,
+      "confidence": 0.7,
+      "risk_score": 0.46,
+      "priority": 4,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for semgrep-rules.python-bad-input. Consider the business impact and prioritize accordingly.",
+        "code_example": null,
+        "effort": "MEDIUM",
+        "sla_days": 60
+      },
+      "tags": [
+        "security"
+      ],
+      "references": []
+    }
+  ],
+  "all_findings": [
+    {
+      "id": "832bbea8bbfdf42d",
+      "title": "semgrep-rules.python-bad-input",
+      "description": "Using input() may lead to injection if not sanitized",
+      "severity": "MEDIUM",
+      "source": "SAST",
+      "location": {
+        "file": "Vulnerable_app/app.py",
+        "line_start": 2,
+        "line_end": 2,
+        "url": null,
+        "method": null,
+        "parameter": null
+      },
+      "cwe": null,
+      "owasp": null,
+      "confidence": 0.7,
+      "risk_score": 0.46,
+      "priority": 4,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for semgrep-rules.python-bad-input. Consider the business impact and prioritize accordingly.",
+        "code_example": null,
+        "effort": "MEDIUM",
+        "sla_days": 60
+      },
+      "tags": [
+        "security"
+      ],
+      "references": []
+    },
+    {
+      "id": "86595c99f9f3fc1d",
+      "title": "SQL Injection",
+      "description": "SQL injection may be possible.",
+      "severity": "CRITICAL",
+      "source": "DAST",
+      "location": {
+        "file": "",
+        "line_start": null,
+        "line_end": null,
+        "url": "http://localhost:5000/login",
+        "method": "POST",
+        "parameter": "username"
+      },
+      "cwe": "CWE-89",
+      "owasp": "A03:2021-Injection",
+      "confidence": 0.7,
+      "risk_score": 1.0,
+      "priority": 1,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "SQL Injection Remediation:\n1. Use parameterized queries (prepared statements) instead of string concatenation\n2. Use ORM frameworks with built-in protection\n3. Implement input validation and sanitization\n4. Apply principle of least privilege for database accounts\n5. Use stored procedures with parameterized inputs",
+        "code_example": "# Vulnerable code:\nquery = f\"SELECT * FROM users WHERE id = {user_id}\"\ncursor.execute(query)\n\n# Secure code:\nquery = \"SELECT * FROM users WHERE id = ?\"\ncursor.execute(query, (user_id,))",
+        "effort": "MEDIUM",
+        "sla_days": 7
+      },
+      "tags": [
+        "40018"
+      ],
+      "references": [
+        "https://owasp.org/www-community/attacks/SQL_Injection"
+      ]
+    },
+    {
+      "id": "004b1d8b6a64f4a1",
+      "title": "Cross Site Scripting (Reflected)",
+      "description": "Cross-site Scripting (XSS) is possible.",
+      "severity": "CRITICAL",
+      "source": "DAST",
+      "location": {
+        "file": "",
+        "line_start": null,
+        "line_end": null,
+        "url": "http://localhost:5000/search",
+        "method": "POST",
+        "parameter": "search"
+      },
+      "cwe": "CWE-79",
+      "owasp": "A03:2021-Injection",
+      "confidence": 0.7,
+      "risk_score": 0.83,
+      "priority": 2,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "Cross-Site Scripting (XSS) Remediation:\n1. Enable auto-escaping in template engines\n2. Use Content Security Policy (CSP) headers\n3. Sanitize user input before rendering\n4. Use framework-provided escaping functions\n5. Validate and encode output based on context (HTML, JavaScript, URL)",
+        "code_example": "# Vulnerable code:\nreturn render_template_string(f\"<h1>Hello {user_input}</h1>\")\n\n# Secure code:\nfrom markupsafe import escape\nreturn render_template_string(f\"<h1>Hello {escape(user_input)}</h1>\")",
+        "effort": "MEDIUM",
+        "sla_days": 14
+      },
+      "tags": [
+        "40012"
+      ],
+      "references": [
+        "https://owasp.org/www-community/attacks/xss/"
+      ]
+    },
+    {
+      "id": "e5a0a9bbcce82b6f",
+      "title": "Remote OS Command Injection",
+      "description": "Command injection may be possible.",
+      "severity": "CRITICAL",
+      "source": "DAST",
+      "location": {
+        "file": "",
+        "line_start": null,
+        "line_end": null,
+        "url": "http://localhost:5000/ping",
+        "method": "POST",
+        "parameter": "host"
+      },
+      "cwe": "CWE-78",
+      "owasp": "A03:2021-Injection",
+      "confidence": 0.7,
+      "risk_score": 0.955,
+      "priority": 1,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "Command Injection Remediation:\n1. Avoid shell=True in subprocess calls\n2. Use subprocess with argument lists instead of shell commands\n3. Validate and whitelist allowed commands\n4. Use libraries instead of shell commands when possible\n5. Implement strict input validation",
+        "code_example": "# Vulnerable code:\nsubprocess.call(f\"ls {user_path}\", shell=True)\n\n# Secure code:\nsubprocess.call([\"ls\", user_path])",
+        "effort": "MEDIUM",
+        "sla_days": 7
+      },
+      "tags": [
+        "90020"
+      ],
+      "references": [
+        "https://owasp.org/www-project-web-security-testing-guide/"
+      ]
+    },
+    {
+      "id": "3f39c2cfc0d22f48",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "No Anti-CSRF tokens were found in a HTML submission form.",
+      "severity": "HIGH",
+      "source": "DAST",
+      "location": {
+        "file": "",
+        "line_start": null,
+        "line_end": null,
+        "url": "http://localhost:5000/transfer",
+        "method": "POST",
+        "parameter": ""
+      },
+      "cwe": "CWE-352",
+      "owasp": "A01:2021-Broken Access Control",
+      "confidence": 0.7,
+      "risk_score": 0.755,
+      "priority": 2,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "CSRF Remediation:\n1. Implement CSRF tokens for state-changing operations\n2. Use SameSite cookie attribute\n3. Verify Origin and Referer headers\n4. Use framework-provided CSRF protection\n5. Require re-authentication for sensitive operations",
+        "code_example": "# Vulnerable code:\n@app.route('/transfer', methods=['POST'])\ndef transfer():\n    amount = request.form['amount']\n    process_transfer(amount)\n\n# Secure code:\nfrom flask_wtf.csrf import CSRFProtect\ncsrf = CSRFProtect(app)\n\n@app.route('/transfer', methods=['POST'])\n@csrf.protect\ndef transfer():\n    amount = request.form['amount']\n    process_transfer(amount)",
+        "effort": "MEDIUM",
+        "sla_days": 14
+      },
+      "tags": [
+        "10202"
+      ],
+      "references": [
+        "https://owasp.org/www-community/attacks/csrf"
+      ]
+    }
+  ]
+}
