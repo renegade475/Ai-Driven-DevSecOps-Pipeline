@@ -278,20 +278,8 @@ jobs:
         run: |
           if [ -f results/ai_analysis.json ]; then
             echo "✅ AI Analysis completed successfully"
-            python -c "
-import json
-with open('results/ai_analysis.json') as f:
-    data = json.load(f)
-    summary = data.get('summary', {})
-    print(f\"📊 Analysis Summary:\")
-    print(f\"  Total Vulnerabilities: {summary.get('total_vulnerabilities', 0)}\")
-    print(f\"  After Filtering: {summary.get('filtered_vulnerabilities', 0)}\")
-    print(f\"  False Positive Rate: {summary.get('false_positive_rate', 0):.1%}\")
-    print(f\"  Critical: {summary.get('by_severity', {}).get('CRITICAL', 0)}\")
-    print(f\"  High: {summary.get('by_severity', {}).get('HIGH', 0)}\")
-    print(f\"  Medium: {summary.get('by_severity', {}).get('MEDIUM', 0)}\")
-    print(f\"  Low: {summary.get('by_severity', {}).get('LOW', 0)}\")
-            " || echo "Summary not available"
+            echo "Analysis file size: $(wc -c < results/ai_analysis.json) bytes"
+            echo "Report generated at: results/ai_analysis.json"
           else
             echo "⚠️ AI analysis output not found"
           fi
