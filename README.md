@@ -385,5 +385,3 @@ For questions or issues:
 ---
 
 **⚠️ Disclaimer**: The vulnerable application in this repository contains intentional security flaws for educational purposes. **DO NOT deploy it to production environments.**
-
-Built with ❤️ for making software more secure
