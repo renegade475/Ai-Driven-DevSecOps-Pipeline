@@ -1,0 +1,436 @@
+rules:
+  # ============================================
+  # A01: Broken Access Control (2017, 2021, 2025)
+  # ============================================
+  - id: python-flask-open-endpoint-no-auth
+    patterns:
+      - pattern: |
+          @app.route($ROUTE, methods=[...])
+          def $FUNC(...):
+              ...
+      - pattern-not: |
+          @app.route($ROUTE, methods=[...])
+          @login_required
+          def $FUNC(...):
+              ...
+    message: "Possible missing access control: route appears unprotected by authentication/authorization decorator"
+    languages: [python]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-284"
+      owasp: ["A01:2017-Broken Access Control", "A01:2021-Broken Access Control", "A01:2025-Broken Access Control"]
+      category: "security"
+
+  - id: python-django-permissive-view
+    patterns:
+      - pattern: |
+          def $VIEW(request, ...):
+              ...
+      - pattern-not: |
+          @login_required
+          def $VIEW(request, ...):
+              ...
+      - pattern-not: |
+          @permission_required(...)
+          def $VIEW(request, ...):
+              ...
+    message: "Django view may be missing explicit authentication/authorization decorators"
+    languages: [python]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-285"
+      owasp: ["A01:2017-Broken Access Control", "A01:2021-Broken Access Control", "A01:2025-Broken Access Control"]
+
+  # ============================================
+  # A02: Security Misconfiguration (2017, 2021, 2025)
+  # ============================================
+  - id: python-flask-debug-enabled
+    patterns:
+      - pattern: $APP.run(debug=True, ...)
+    message: "Flask debug mode enabled - disable in production"
+    languages: [python]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-489"
+      owasp: ["A05:2021-Security Misconfiguration", "A02:2025-Security Misconfiguration"]
+      category: "security"
+
+  - id: python-django-debug-true
+    patterns:
+      - pattern: |
+          DEBUG = True
+    message: "Django DEBUG = True - should be False in production"
+    languages: [python]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-16"
+      owasp: ["A06:2017-Security Misconfiguration", "A05:2021-Security Misconfiguration", "A02:2025-Security Misconfiguration"]
+
+  - id: python-ssl-verification-disabled
+    patterns:
+      - pattern-either:
+          - pattern: requests.get(..., verify=False)
+          - pattern: requests.post(..., verify=False)
+          - pattern: urllib.request.urlopen(..., context=ssl._create_unverified_context())
+    message: "SSL/TLS verification disabled - risk of MITM"
+    languages: [python]
+    severity: ERROR
+    metadata:
+      cwe: "CWE-295"
+      owasp: ["A02:2021-Cryptographic Failures", "A02:2025-Security Misconfiguration"]
+
+  # ============================================
+  # A03/A05 Injection (2017/2025) & A03:2021
+  # ============================================
+  # SQL injection
+  - id: python-sql-injection-format
+    patterns:
+      - pattern-either:
+          - pattern: $CURSOR.execute("..." % ...)
+          - pattern: $CURSOR.execute("..." + ...)
+          - pattern: $CURSOR.execute(f"...")
+          - pattern: $CURSOR.execute("...".format(...))
+    message: "SQL injection: avoid string formatting/concatenation, use parameterized queries"
+    languages: [python]
+    severity: ERROR
+    metadata:
+      cwe: "CWE-89"
+      owasp: ["A1:2017-Injection", "A03:2021-Injection", "A05:2025-Injection"]
+      category: "security"
+      fix: "Use parameterized queries: cursor.execute('SELECT * FROM users WHERE id = %s', (user_id,))"
+
+  - id: python-sql-injection-raw-query
+    patterns:
+      - pattern-either:
+          - pattern: $MODEL.objects.raw($QUERY)
+          - pattern: $MODEL.objects.extra(where=[$QUERY])
+    message: "Potential SQL injection in Django raw/extra queries"
+    languages: [python]
+    severity: ERROR
+    metadata:
+      cwe: "CWE-89"
+      owasp: ["A1:2017-Injection", "A03:2021-Injection", "A05:2025-Injection"]
+
+  # Command injection
+  - id: python-command-injection-os-system
+    patterns:
+      - pattern-either:
+          - pattern: os.system($CMD)
+          - pattern: os.popen($CMD)
+          - pattern: subprocess.call($CMD, shell=True)
+          - pattern: subprocess.run($CMD, shell=True)
+          - pattern: subprocess.Popen($CMD, shell=True)
+      - pattern-not: os.system("...")
+      - pattern-not: subprocess.call("...", shell=True)
+    message: "Command injection: avoid shell=True or unsanitized input in OS commands"
+    languages: [python]
+    severity: ERROR
+    metadata:
+      cwe: "CWE-78"
+      owasp: ["A1:2017-Injection", "A03:2021-Injection", "A05:2025-Injection"]
+
+  # LDAP injection
+  - id: python-ldap-injection
+    patterns:
+      - pattern: ldap.search($FILTER)
+      - pattern-not: ldap.search("...")
+    message: "LDAP injection: validate and sanitize LDAP filters"
+    languages: [python]
+    severity: ERROR
+    metadata:
+      cwe: "CWE-90"
+      owasp: ["A1:2017-Injection", "A03:2021-Injection", "A05:2025-Injection"]
+
+  # Eval/code injection
+  - id: python-eval-use
+    patterns:
+      - pattern: eval($INPUT)
+      - pattern-not: eval("...")
+    message: "Code injection risk: eval() with non-constant input is dangerous"
+    languages: [python]
+    severity: ERROR
+    metadata:
+      cwe: "CWE-95"
+      owasp: ["A1:2017-Injection", "A03:2021-Injection", "A05:2025-Injection"]
+
+  # ============================================
+  # A04:2017 XXE / A04:2025 Cryptographic Failures (part)
+  # ============================================
+  - id: python-xxe-vulnerability
+    patterns:
+      - pattern-either:
+          - pattern: xml.etree.ElementTree.parse($FILE)
+          - pattern: xml.etree.ElementTree.fromstring($DATA)
+    message: "XXE risk: configure secure XML parser or disable external entities"
+    languages: [python]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-611"
+      owasp: ["A4:2017-XML External Entities (XXE)", "A02:2021-Cryptographic Failures"]
+
+  # ============================================
+  # Cryptographic Failures (A2:2021, A04:2025)
+  # ============================================
+  - id: python-weak-hash-function
+    patterns:
+      - pattern-either:
+          - pattern: hashlib.md5(...)
+          - pattern: hashlib.sha1(...)
+    message: "Weak hash (MD5/SHA1) - use SHA-256 or a password hashing function (bcrypt, Argon2)"
+    languages: [python]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-327"
+      owasp: ["A2:2017-Sensitive Data Exposure", "A02:2021-Cryptographic Failures", "A04:2025-Cryptographic Failures"]
+
+  - id: python-insecure-random
+    patterns:
+      - pattern-either:
+          - pattern: random.random()
+          - pattern: random.randint(...)
+          - pattern: random.choice(...)
+    message: "Insecure random for security context - use secrets.{token_hex,randbelow} instead"
+    languages: [python]
+    severity: INFO
+    metadata:
+      cwe: "CWE-330"
+      owasp: ["A2:2017-Sensitive Data Exposure", "A02:2021-Cryptographic Failures", "A04:2025-Cryptographic Failures"]
+
+  - id: python-flask-secret-key-weak
+    patterns:
+      - pattern: $APP.config['SECRET_KEY'] = "..."
+    message: "Flask SECRET_KEY is hardcoded - should be strong, random, and loaded from environment or secret manager"
+    languages: [python]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-330"
+      owasp: ["A2:2017-Sensitive Data Exposure", "A02:2021-Cryptographic Failures", "A04:2025-Cryptographic Failures"]
+
+  # ============================================
+  # A06:2017 / A03:2021 / A06:2025 Vulnerable/Outdated Components & Supply Chain
+  # ============================================
+  - id: python-pip-insecure-index
+    patterns:
+      - pattern: pip install --index-url $URL ...
+      - metavariable-regex:
+          metavariable: $URL
+          regex: ^http://.*
+    message: "Insecure package index over HTTP - use HTTPS for dependency supply chain security"
+    languages: [python]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-829"
+      owasp: ["A6:2017-Using Components with Known Vulnerabilities", "A06:2021-Vulnerable and Outdated Components", "A03:2025-Software Supply Chain Failures"]
+
+  - id: python-unpinned-dependency-requirements
+    patterns:
+      - pattern: |
+          - $PKG
+    paths:
+      include:
+        - "requirements.txt"
+    message: "Unpinned dependency version - pin versions to reduce supply chain risk"
+    languages: [generic]
+    severity: INFO
+    metadata:
+      cwe: "CWE-1104"
+      owasp: ["A6:2017-Using Components with Known Vulnerabilities", "A06:2021-Vulnerable and Outdated Components", "A03:2025-Software Supply Chain Failures"]
+
+  # ============================================
+  # A07/A02:2017-Authentication & A07:2021 & A07:2025
+  # ============================================
+  - id: python-hardcoded-password
+    patterns:
+      - pattern-either:
+          - pattern: $VAR = "..."
+          - pattern: $DICT["..."] = "..."
+      - metavariable-regex:
+          metavariable: $VAR
+          regex: .*(password|passwd|pwd|secret|token|api_key|apikey|auth|credential).*
+    message: "Hardcoded credential/secret detected"
+    languages: [python]
+    severity: ERROR
+    metadata:
+      cwe: "CWE-798"
+      owasp: ["A2:2017-Broken Authentication", "A07:2021-Identification and Authentication Failures", "A07:2025-Authentication Failures"]
+      category: "security"
+
+  - id: python-print-sensitive-data
+    patterns:
+      - pattern: print($VAR)
+      - metavariable-regex:
+          metavariable: $VAR
+          regex: .*(password|token|secret|key|credential|auth).*
+    message: "Sensitive data may be logged or printed"
+    languages: [python]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-532"
+      owasp: ["A3:2017-Sensitive Data Exposure", "A09:2021-Security Logging and Monitoring Failures", "A09:2025-Security Logging & Alerting Failures"]
+
+  # ============================================
+  # A03:2017 / A07:2021 / XSS
+  # ============================================
+  - id: python-flask-render-template-string
+    patterns:
+      - pattern: flask.render_template_string($TEMPLATE, ...)
+      - pattern-not: flask.render_template_string("...", ...)
+    message: "XSS: render_template_string with non-constant template"
+    languages: [python]
+    severity: ERROR
+    metadata:
+      cwe: "CWE-79"
+      owasp: ["A7:2017-Cross-Site Scripting (XSS)", "A03:2021-Injection"]
+      category: "security"
+
+  - id: python-jinja2-autoescape-disabled
+    patterns:
+      - pattern: jinja2.Environment(autoescape=False, ...)
+    message: "XSS risk: Jinja2 autoescape disabled"
+    languages: [python]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-79"
+      owasp: ["A7:2017-Cross-Site Scripting (XSS)", "A05:2021-Security Misconfiguration"]
+
+  # ============================================
+  # A08:2017 / A08:2021 Insecure Deserialization / Data Integrity
+  # ============================================
+  - id: python-pickle-unsafe
+    patterns:
+      - pattern-either:
+          - pattern: pickle.loads($DATA)
+          - pattern: pickle.load($FILE)
+    message: "Insecure deserialization: pickle can execute arbitrary code"
+    languages: [python]
+    severity: ERROR
+    metadata:
+      cwe: "CWE-502"
+      owasp: ["A8:2017-Insecure Deserialization", "A08:2021-Software and Data Integrity Failures", "A08:2025-Software or Data Integrity Failures"]
+
+  - id: python-yaml-unsafe-load
+    patterns:
+      - pattern: yaml.load($DATA)
+      - pattern-not: yaml.load($DATA, Loader=yaml.SafeLoader)
+    message: "Unsafe YAML deserialization - use yaml.safe_load() or SafeLoader"
+    languages: [python]
+    severity: ERROR
+    metadata:
+      cwe: "CWE-502"
+      owasp: ["A8:2017-Insecure Deserialization", "A08:2021-Software and Data Integrity Failures", "A08:2025-Software or Data Integrity Failures"]
+
+  - id: python-jsonpickle-unsafe
+    patterns:
+      - pattern-either:
+          - pattern: jsonpickle.decode($DATA)
+    message: "Potential insecure deserialization via jsonpickle"
+    languages: [python]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-502"
+      owasp: ["A8:2017-Insecure Deserialization", "A08:2021-Software and Data Integrity Failures"]
+
+  # ============================================
+  # A09:2017 / A09:2021 / A09:2025 Logging & Monitoring
+  # ============================================
+  - id: python-exception-message-disclosure
+    patterns:
+      - pattern: |
+          try:
+              ...
+          except $EX as $E:
+              return str($E)
+    message: "Exception details may disclose sensitive information"
+    languages: [python]
+    severity: INFO
+    metadata:
+      cwe: "CWE-209"
+      owasp: ["A10:2017-Insufficient Logging & Monitoring", "A09:2021-Security Logging and Monitoring Failures", "A09:2025-Security Logging & Alerting Failures"]
+
+  # ============================================
+  # A10:2021 SSRF
+  # ============================================
+  - id: python-ssrf-requests
+    patterns:
+      - pattern-either:
+          - pattern: requests.get($URL, ...)
+          - pattern: requests.post($URL, ...)
+          - pattern: urllib.request.urlopen($URL)
+      - pattern-not: requests.get("...", ...)
+    message: "SSRF: validate, normalize, and whitelist URLs before outbound requests"
+    languages: [python]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-918"
+      owasp: ["A10:2021-Server-Side Request Forgery", "A05:2025-Injection"]
+
+  # ============================================
+  # A06:2025 Insecure Design / Input Validation
+  # ============================================
+  - id: python-bad-input
+    patterns:
+      - pattern: input($X)
+    message: "Unsanitized input() may lead to injection or unsafe behavior"
+    languages: [python]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-20"
+      owasp: ["A4:2021-Insecure Design", "A06:2025-Insecure Design"]
+      category: "security"
+
+  - id: python-path-traversal
+    patterns:
+      - pattern-either:
+          - pattern: open($PATH, ...)
+          - pattern: os.path.join($BASE, $PATH)
+      - pattern-not: open("...", ...)
+    message: "Path traversal risk: validate and normalize user-controlled file paths"
+    languages: [python]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-22"
+      owasp: ["A5:2017-Broken Access Control", "A01:2021-Broken Access Control"]
+
+  # ============================================
+  # CSRF (A01:2021 Broken Access Control)
+  # ============================================
+  - id: python-flask-csrf-disabled
+    patterns:
+      - pattern: $APP.config['WTF_CSRF_ENABLED'] = False
+    message: "CSRF protection explicitly disabled"
+    languages: [python]
+    severity: ERROR
+    metadata:
+      cwe: "CWE-352"
+      owasp: ["A5:2017-Broken Access Control", "A01:2021-Broken Access Control"]
+
+  # ============================================
+  # A10:2025 Mishandling of Exceptional Conditions
+  # ============================================
+  - id: python-broad-except-pass
+    patterns:
+      - pattern: |
+          try:
+              ...
+          except:
+              pass
+    message: "Swallowing all exceptions hides errors and security issues"
+    languages: [python]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-391"
+      owasp: ["A10:2025-Mishandling of Exceptional Conditions"]
+
+  - id: python-broad-except-logger-debug-only
+    patterns:
+      - pattern: |
+          try:
+              ...
+          except Exception as $E:
+              logger.debug($E)
+    message: "Exception only logged at debug level - may hinder detection of security incidents"
+    languages: [python]
+    severity: INFO
+    metadata:
+      cwe: "CWE-389"
+      owasp: ["A10:2025-Mishandling of Exceptional Conditions", "A09:2025-Security Logging & Alerting Failures"]
