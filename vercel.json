@@ -1,0 +1,25 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "dashboard/package.json",
+            "use": "@vercel/static-build",
+            "config": {
+                "distDir": "dist"
+            }
+        }
+    ],
+    "routes": [
+        {
+            "src": "/data/ai_analysis.json",
+            "dest": "/data/ai_analysis.json"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/dashboard/$1"
+        }
+    ],
+    "buildCommand": "cd dashboard && npm install && npm run build",
+    "outputDirectory": "dashboard/dist",
+    "framework": "vite"
+}

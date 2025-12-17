@@ -329,8 +329,19 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ai-analysis
-          path: dashboard/public/data/
+          path: ./
         continue-on-error: true
+      
+      - name: Embed AI Analysis in Dashboard
+        run: |
+          mkdir -p dashboard/public/data
+          if [ -f ai_analysis.json ]; then
+            echo "✅ Embedding AI analysis in dashboard build"
+            cp ai_analysis.json dashboard/public/data/ai_analysis.json
+          else
+            echo "⚠️ No AI analysis found, using empty data"
+            echo '{"summary":{"total_vulnerabilities":0}}' > dashboard/public/data/ai_analysis.json
+          fi
       
       - name: Install Dashboard Dependencies
         run: |

@@ -1,0 +1,23 @@
+{
+    "name": "ai-driven-devsecops-pipeline",
+    "version": "1.0.0",
+    "description": "Enterprise-grade AI-Driven DevSecOps Pipeline with automated security scanning, intelligent vulnerability analysis, and real-time dashboard",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/renegade475/Ai-Driven-DevSecOps-Pipeline"
+    },
+    "keywords": [
+        "devsecops",
+        "security",
+        "ai",
+        "sast",
+        "dast",
+        "vulnerability-analysis",
+        "github-actions",
+        "dashboard",
+        "semgrep",
+        "owasp-zap"
+    ],
+    "author": "renegade475",
+    "license": "MIT"
+}
