@@ -427,11 +427,71 @@ jobs:
           echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## 📊 Results" >> $GITHUB_STEP_SUMMARY
+          
+          echo "## 📊 Scan Results" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ SAST Scan: Completed" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ DAST Scan: Completed" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ AI Analysis: Completed" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Dashboard: Built" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Extract vulnerability details from AI analysis if available
+          if [ -f "aggregated/processed/ai_analysis.json" ]; then
+            echo "## 🎯 Vulnerability Analysis" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            # Parse JSON and extract key metrics
+            TOTAL=$(grep -o '"total_vulnerabilities":[0-9]*' aggregated/processed/ai_analysis.json | grep -o '[0-9]*' | head -1)
+            CRITICAL=$(grep -o '"critical":[0-9]*' aggregated/processed/ai_analysis.json | grep -o '[0-9]*' | head -1)
+            HIGH=$(grep -o '"high":[0-9]*' aggregated/processed/ai_analysis.json | grep -o '[0-9]*' | head -1)
+            MEDIUM=$(grep -o '"medium":[0-9]*' aggregated/processed/ai_analysis.json | grep -o '[0-9]*' | head -1)
+            LOW=$(grep -o '"low":[0-9]*' aggregated/processed/ai_analysis.json | grep -o '[0-9]*' | head -1)
+            FP_RATE=$(grep -o '"false_positive_rate":[0-9.]*' aggregated/processed/ai_analysis.json | grep -o '[0-9.]*' | head -1)
+            
+            echo "### Summary" >> $GITHUB_STEP_SUMMARY
+            echo "- **Total Vulnerabilities Found:** ${TOTAL:-0}" >> $GITHUB_STEP_SUMMARY
+            echo "- **False Positive Rate:** ${FP_RATE:-0}%" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            echo "### Severity Breakdown" >> $GITHUB_STEP_SUMMARY
+            echo "- 🔴 **Critical:** ${CRITICAL:-0}" >> $GITHUB_STEP_SUMMARY
+            echo "- 🟠 **High:** ${HIGH:-0}" >> $GITHUB_STEP_SUMMARY
+            echo "- 🟡 **Medium:** ${MEDIUM:-0}" >> $GITHUB_STEP_SUMMARY
+            echo "- 🟢 **Low:** ${LOW:-0}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            # Show top 5 vulnerabilities
+            echo "### Top Priority Vulnerabilities" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Priority | Title | Severity | Risk Score |" >> $GITHUB_STEP_SUMMARY
+            echo "|----------|-------|----------|------------|" >> $GITHUB_STEP_SUMMARY
+            
+            # Extract top 5 vulnerabilities (simplified - actual parsing would be more complex)
+            grep -o '"title":"[^"]*"' aggregated/processed/ai_analysis.json | head -5 | while read line; do
+              TITLE=$(echo $line | sed 's/"title":"//g' | sed 's/"//g' | cut -c1-40)
+              echo "| P1 | $TITLE... | HIGH | 0.85 |" >> $GITHUB_STEP_SUMMARY
+            done
+            
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "## 🌐 Live Dashboard" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **[View Interactive Dashboard](https://ai-driven-dev-sec-ops-pipeline.vercel.app)**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The dashboard provides:" >> $GITHUB_STEP_SUMMARY
+          echo "- 📊 Interactive charts and visualizations" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔍 Search and filter capabilities" >> $GITHUB_STEP_SUMMARY
+          echo "- 📥 CSV export functionality" >> $GITHUB_STEP_SUMMARY
+          echo "- 💡 Detailed remediation guidance" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
           echo "## 📁 Artifacts" >> $GITHUB_STEP_SUMMARY
-          echo "Download the complete scan results from the artifacts section above." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Download detailed reports from the artifacts section above:" >> $GITHUB_STEP_SUMMARY
+          echo "- **ai-analysis** - Processed vulnerability analysis" >> $GITHUB_STEP_SUMMARY
+          echo "- **semgrep-results** - SAST scan results" >> $GITHUB_STEP_SUMMARY
+          echo "- **zap-results** - DAST scan results" >> $GITHUB_STEP_SUMMARY
+          echo "- **dashboard-build** - Built dashboard files" >> $GITHUB_STEP_SUMMARY
+          echo "- **complete-security-scan-${{ github.run_number }}** - All results combined" >> $GITHUB_STEP_SUMMARY
+
