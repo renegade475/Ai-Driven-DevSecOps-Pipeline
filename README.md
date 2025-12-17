@@ -85,11 +85,25 @@ Modern software development demands fast CI/CD pipelines, but integrating securi
    - Manual trigger via workflow_dispatch
    - Daily at 2 AM UTC (scheduled scan)
 
-4. **View results**
+4. **Deploy Dashboard to Vercel** (Recommended)
+   
+   [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/renegade475/Ai-Driven-DevSecOps-Pipeline&project-name=ai-devsecops-dashboard&repository-name=ai-devsecops-dashboard&root-directory=dashboard)
+   
+   **One-click deployment** - Your dashboard will be live at a URL like:
+   ```
+   https://ai-devsecops-dashboard.vercel.app
+   ```
+   
+   **Auto-updates**: Every GitHub push automatically deploys the latest scan results!
+   
+   See [VERCEL_DEPLOYMENT.md](VERCEL_DEPLOYMENT.md) for detailed setup instructions.
+
+5. **View results**
    
    After the workflow completes:
-   - Download artifacts from the Actions tab
-   - View the dashboard by opening `dashboard/dist/index.html` after building
+   - **Live Dashboard**: Visit your Vercel URL (auto-updates with each scan)
+   - **Download Artifacts**: Get detailed reports from the Actions tab
+   - **Local Dashboard**: Build and run `dashboard/` for offline viewing
 
 ### Running Locally
 
