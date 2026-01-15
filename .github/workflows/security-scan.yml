@@ -2,9 +2,9 @@ name: AI-Driven DevSecOps Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ '**' ]  # Run on all branches
   pull_request:
-    branches: [ main, develop ]
+    branches: [ '**' ]  # Run on PRs to all branches
   workflow_dispatch:
   schedule:
     # Run daily security scans at 2 AM UTC
@@ -442,35 +442,23 @@ jobs:
             
             # Parse JSON and extract key metrics
             TOTAL=$(grep -o '"total_vulnerabilities":[0-9]*' aggregated/processed/ai_analysis.json | grep -o '[0-9]*' | head -1)
-            CRITICAL=$(grep -o '"critical":[0-9]*' aggregated/processed/ai_analysis.json | grep -o '[0-9]*' | head -1)
-            HIGH=$(grep -o '"high":[0-9]*' aggregated/processed/ai_analysis.json | grep -o '[0-9]*' | head -1)
-            MEDIUM=$(grep -o '"medium":[0-9]*' aggregated/processed/ai_analysis.json | grep -o '[0-9]*' | head -1)
-            LOW=$(grep -o '"low":[0-9]*' aggregated/processed/ai_analysis.json | grep -o '[0-9]*' | head -1)
             FP_RATE=$(grep -o '"false_positive_rate":[0-9.]*' aggregated/processed/ai_analysis.json | grep -o '[0-9.]*' | head -1)
             
-            echo "### Summary" >> $GITHUB_STEP_SUMMARY
-            echo "- **Total Vulnerabilities Found:** ${TOTAL:-0}" >> $GITHUB_STEP_SUMMARY
-            echo "- **False Positive Rate:** ${FP_RATE:-0}%" >> $GITHUB_STEP_SUMMARY
+            echo "**Total Vulnerabilities Found:** ${TOTAL:-0} | **False Positive Rate:** ${FP_RATE:-0}%" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             
-            echo "### Severity Breakdown" >> $GITHUB_STEP_SUMMARY
-            echo "- 🔴 **Critical:** ${CRITICAL:-0}" >> $GITHUB_STEP_SUMMARY
-            echo "- 🟠 **High:** ${HIGH:-0}" >> $GITHUB_STEP_SUMMARY
-            echo "- 🟡 **Medium:** ${MEDIUM:-0}" >> $GITHUB_STEP_SUMMARY
-            echo "- 🟢 **Low:** ${LOW:-0}" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            
-            # Show top 5 vulnerabilities
+            # Show top 5 vulnerabilities with actual data
             echo "### Top Priority Vulnerabilities" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "| Priority | Title | Severity | Risk Score |" >> $GITHUB_STEP_SUMMARY
             echo "|----------|-------|----------|------------|" >> $GITHUB_STEP_SUMMARY
             
-            # Extract top 5 vulnerabilities (simplified - actual parsing would be more complex)
-            grep -o '"title":"[^"]*"' aggregated/processed/ai_analysis.json | head -5 | while read line; do
-              TITLE=$(echo $line | sed 's/"title":"//g' | sed 's/"//g' | cut -c1-40)
-              echo "| P1 | $TITLE... | HIGH | 0.85 |" >> $GITHUB_STEP_SUMMARY
-            done
+            # Extract top 5 vulnerabilities using jq
+            if command -v jq &> /dev/null; then
+              jq -r '.top_priorities[:5] | .[] | "| P\(.priority) | \(.title[:50])... | \(.severity) | \(.risk_score) |"' aggregated/processed/ai_analysis.json >> $GITHUB_STEP_SUMMARY 2>/dev/null || echo "| - | Unable to parse vulnerabilities | - | - |" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "| - | jq not available | - | - |" >> $GITHUB_STEP_SUMMARY
+            fi
             
             echo "" >> $GITHUB_STEP_SUMMARY
           fi
