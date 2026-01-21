@@ -533,6 +533,13 @@ jobs:
             fi
             
             echo "" >> $GITHUB_STEP_SUMMARY
+
+            # 2. REMEDIATION SECTION (Detailed Fixes)
+            echo "### 🛠️ Remediation Plan" >> $GITHUB_STEP_SUMMARY
+            echo "Actionable guidance for the highest risk findings." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            if command -v jq &> /dev/null; then
+            jq -r '.top_priorities[:5] | .[] | "#### 🔧 Fix for: \(.title)\n\n> \(.remediation.guidance // "No specialized guidance available.")\n\n**Secure Code Example:**\n```python\n\(.remediation.code_example // "# No specific code example provided")\n```\n\n---\n"' aggregated/processed/ai_analysis.json >> $GITHUB_STEP_SUMMARY 2>/dev/null
           fi
           
           echo "## 🌐 Live Dashboard" >> $GITHUB_STEP_SUMMARY
