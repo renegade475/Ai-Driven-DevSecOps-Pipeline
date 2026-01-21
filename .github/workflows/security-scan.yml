@@ -2,9 +2,9 @@ name: AI-Driven DevSecOps Pipeline
 
 on:
   push:
-    branches: [ '**' ]  # Run on all branches
+    branches: [ main, develop, jay ]
   pull_request:
-    branches: [ '**' ]  # Run on PRs to all branches
+    branches: [ main, develop, jay ]
   workflow_dispatch:
   schedule:
     # Run daily security scans at 2 AM UTC
@@ -489,6 +489,78 @@ jobs:
           echo "- ✅ Dashboard: Built" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
+          python3 -c '
+          import json
+          import os
+          import sys
+          
+          try:
+              results_file = "aggregated/processed/ai_analysis.json"
+              if not os.path.exists(results_file):
+                  print("No analysis report found.")
+                  sys.exit(0)
+                  
+              with open(results_file, "r") as f:
+                  data = json.load(f)
+              
+              summary = data.get("summary", {})
+              top_priorities = data.get("top_priorities", [])
+              
+              # Build Markdown content
+              md_lines = []
+              md_lines.append("# 🔒 Security Scan Summary")
+              md_lines.append("")
+              
+              # Add metadata
+              md_lines.append(f"**Scan Date:** {os.popen("date -u").read().strip()}")
+              md_lines.append("")
+              
+              md_lines.append("## 📊 Scan Statistics")
+              md_lines.append(f"- **Total Findings:** {summary.get("total_vulnerabilities", 0)}")
+              md_lines.append(f"- **False Positive Rate:** {summary.get("false_positive_rate", 0):.1%}")
+              md_lines.append(f"- **Critical:** {summary.get("by_severity", {}).get("CRITICAL", 0)}")
+              md_lines.append(f"- **High:** {summary.get("by_severity", {}).get("HIGH", 0)}")
+              md_lines.append(f"- **Medium:** {summary.get("by_severity", {}).get("MEDIUM", 0)}")
+              md_lines.append(f"- **Low:** {summary.get("by_severity", {}).get("LOW", 0)}")
+              md_lines.append("")
+              
+              if top_priorities:
+                  md_lines.append("## 🎯 Top Priority Vulnerabilities")
+                  md_lines.append("")
+                  
+                  for idx, vuln in enumerate(top_priorities, 1):
+                      title = vuln.get("title", "Unknown Vulnerability")
+                      severity = vuln.get("severity", "UNKNOWN")
+                      desc = vuln.get("description", "No description available")
+                      remediation = vuln.get("remediation_guidance", "No remediation available")
+                      
+                      # Icon based on severity
+                      icon = "🔴" if severity == "CRITICAL" else "🟠" if severity == "HIGH" else "🟡"
+                      
+                      md_lines.append(f"### {idx}. {icon} {title} ({severity})")
+                      md_lines.append(f">{desc}")
+                      md_lines.append("")
+                      
+                      # Remediation details
+                      md_lines.append("<details>")
+                      md_lines.append("<summary><strong>🛠️ View Remediation Guidance</strong></summary>")
+                      md_lines.append("")
+                      md_lines.append(remediation)
+                      md_lines.append("")
+                      md_lines.append("</details>")
+                      md_lines.append("")
+                      md_lines.append("---")
+                      md_lines.append("")
+
+              # Write to GITHUB_STEP_SUMMARY
+              with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
+                  f.write("\n".join(md_lines))
+                  
+          except Exception as e:
+              print(f"Error generating summary: {str(e)}")
+              # Don"t fail the build for a summary error
+              sys.exit(0)
+          '
           # Extract vulnerability details from AI analysis if available
           if [ -f "aggregated/processed/ai_analysis.json" ]; then
             echo "## 🎯 Vulnerability Analysis" >> $GITHUB_STEP_SUMMARY
@@ -515,6 +587,13 @@ jobs:
             fi
             
             echo "" >> $GITHUB_STEP_SUMMARY
+
+            # 2. REMEDIATION SECTION (Detailed Fixes)
+            echo "### 🛠️ Remediation Plan" >> $GITHUB_STEP_SUMMARY
+            echo "Actionable guidance for the highest risk findings." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            if command -v jq &> /dev/null; then
+            jq -r '.top_priorities[:5] | .[] | "#### 🔧 Fix for: \(.title)\n\n> \(.remediation.guidance // "No specialized guidance available.")\n\n**Secure Code Example:**\n```python\n\(.remediation.code_example // "# No specific code example provided")\n```\n\n---\n"' aggregated/processed/ai_analysis.json >> $GITHUB_STEP_SUMMARY 2>/dev/null
           fi
           
           echo "## 🌐 Live Dashboard" >> $GITHUB_STEP_SUMMARY

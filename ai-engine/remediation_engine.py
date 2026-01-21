@@ -1,269 +1,152 @@
 """
-Remediation Engine for the AI-Driven DevSecOps Pipeline
-Generates actionable remediation guidance for vulnerabilities
+Enhanced Remediation Engine for the AI-Driven DevSecOps Pipeline
+Generates detailed, context-aware remediation guidance using Google Gemini.
 """
 
-from typing import Dict, Optional
+import os
+import json
+from pathlib import Path
+from typing import List, Dict, Any
+
+from dotenv import load_dotenv
+import google.generativeai as genai
 from models import Vulnerability
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Configure Gemini API
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 
 class RemediationEngine:
-    """Generates remediation guidance for vulnerabilities"""
-    
-    def __init__(self):
-        """Initialize remediation engine"""
-        self.remediation_templates = self._load_templates()
-    
-    def generate_guidance(self, vulnerabilities: list[Vulnerability]) -> list[Vulnerability]:
+    """Generates remediation guidance using detailed scanner metadata and Gemini AI"""
+
+    def __init__(self, model_name: str = "gemini-1.5-flash"):
         """
-        Generate remediation guidance for all vulnerabilities
+        Initialize the remediation engine with Gemini model.
         
         Args:
-            vulnerabilities: List of vulnerabilities
+            model_name: The Gemini model to use (default: gemini-1.5-flash)
+        """
+        self.model = genai.GenerativeModel(model_name)
+
+    def _generate_with_gemini(self, llm_context: Dict[str, Any]) -> str:
+        """
+        Call Gemini API to generate remediation guidance.
+        
+        Args:
+            llm_context: Structured context about the vulnerability
             
         Returns:
-            List with remediation guidance added
+            Generated remediation guidance from Gemini
+        """
+        prompt = f"""You are a security expert. Analyze this vulnerability and provide detailed remediation guidance.
+
+**Vulnerability Details:**
+- **File:** {llm_context['file_path']}
+- **Lines:** {llm_context['line_range']['start']} - {llm_context['line_range']['end']}
+- **CWE:** {llm_context['cwe']}
+- **Severity:** {llm_context['severity']}
+- **Description:** {llm_context['description']}
+
+**Vulnerable Code:**
+```
+{llm_context['vulnerable_code']}
+```
+
+**Additional Context:**
+{json.dumps(llm_context.get('raw_data', {}), indent=2)}
+
+Please provide:
+1. **Root Cause Analysis**: Why is this code vulnerable?
+2. **Impact Assessment**: What could happen if exploited?
+3. **Remediation Steps**: Step-by-step fix instructions
+4. **Fixed Code Example**: Provide corrected code
+5. **Prevention Tips**: How to avoid this in the future
+
+Be specific and actionable in your response."""
+
+        try:
+            response = self.model.generate_content(prompt)
+            return response.text
+        except Exception as e:
+            return f"[ERROR] Failed to generate remediation with Gemini: {str(e)}"
+
+    def generate_guidance(self, vulnerabilities: List[Vulnerability]) -> List[Vulnerability]:
+        """
+        Generate remediation guidance for all vulnerabilities.
+
+        Each vulnerability gets a structured LLM context payload
+        that can be passed directly to an LLM for fix generation.
         """
         for vuln in vulnerabilities:
             if vuln.is_false_positive:
                 continue
-            
-            guidance, code_example = self._get_remediation(vuln)
-            vuln.remediation_guidance = guidance
-            vuln.code_example = code_example
-        
+
+            llm_context = self._build_llm_context(vuln)
+
+            # Generate remediation using Gemini
+            remediation = self._generate_with_gemini(llm_context)
+
+            vuln.remediation_guidance = remediation
+            vuln.code_example = llm_context["vulnerable_code"]
+            vuln.llm_context = llm_context  # Optional: store full context
+
         return vulnerabilities
-    
-    def _get_remediation(self, vuln: Vulnerability) -> tuple[str, Optional[str]]:
+
+    def _build_llm_context(self, vuln: Vulnerability) -> Dict[str, Any]:
         """
-        Get remediation guidance for a vulnerability
-        
-        Args:
-            vuln: Vulnerability
-            
-        Returns:
-            Tuple of (guidance text, code example)
+        Build a single structured context object for LLM consumption.
         """
-        cwe = vuln.cwe
-        
-        # Handle CWE as list (take first element) or string
-        if isinstance(cwe, list):
-            cwe = cwe[0] if cwe else None
-        
-        # Try to find specific remediation for CWE
-        if cwe and cwe in self.remediation_templates:
-            template = self.remediation_templates[cwe]
-            return template['guidance'], template.get('code_example')
-        
-        # Fall back to generic guidance based on severity
-        return self._get_generic_guidance(vuln), None
-    
-    def _get_generic_guidance(self, vuln: Vulnerability) -> str:
-        """Get generic remediation guidance"""
-        return (
-            f"Review and remediate this {vuln.severity.value} severity vulnerability. "
-            f"Consult security best practices and OWASP guidelines for {vuln.title}. "
-            f"Consider the business impact and prioritize accordingly."
+        file_path = vuln.location.file_path
+        line_start = vuln.location.line_start
+        line_end = vuln.location.line_end
+
+        vulnerable_code = self._extract_vulnerable_code(
+            file_path, line_start, line_end
         )
-    
-    def _load_templates(self) -> Dict[str, Dict]:
-        """Load remediation templates for common CWEs"""
+
         return {
-            'CWE-89': {
-                'guidance': (
-                    "SQL Injection Remediation:\n"
-                    "1. Use parameterized queries (prepared statements) instead of string concatenation\n"
-                    "2. Use ORM frameworks with built-in protection\n"
-                    "3. Implement input validation and sanitization\n"
-                    "4. Apply principle of least privilege for database accounts\n"
-                    "5. Use stored procedures with parameterized inputs"
-                ),
-                'code_example': '''# Vulnerable code:
-query = f"SELECT * FROM users WHERE id = {user_id}"
-cursor.execute(query)
-
-# Secure code:
-query = "SELECT * FROM users WHERE id = ?"
-cursor.execute(query, (user_id,))'''
+            "file_path": file_path,
+            "line_range": {
+                "start": line_start,
+                "end": line_end
             },
-            
-            'CWE-79': {
-                'guidance': (
-                    "Cross-Site Scripting (XSS) Remediation:\n"
-                    "1. Enable auto-escaping in template engines\n"
-                    "2. Use Content Security Policy (CSP) headers\n"
-                    "3. Sanitize user input before rendering\n"
-                    "4. Use framework-provided escaping functions\n"
-                    "5. Validate and encode output based on context (HTML, JavaScript, URL)"
-                ),
-                'code_example': '''# Vulnerable code:
-return render_template_string(f"<h1>Hello {user_input}</h1>")
-
-# Secure code:
-from markupsafe import escape
-return render_template_string(f"<h1>Hello {escape(user_input)}</h1>")'''
-            },
-            
-            'CWE-78': {
-                'guidance': (
-                    "Command Injection Remediation:\n"
-                    "1. Avoid shell=True in subprocess calls\n"
-                    "2. Use subprocess with argument lists instead of shell commands\n"
-                    "3. Validate and whitelist allowed commands\n"
-                    "4. Use libraries instead of shell commands when possible\n"
-                    "5. Implement strict input validation"
-                ),
-                'code_example': '''# Vulnerable code:
-subprocess.call(f"ls {user_path}", shell=True)
-
-# Secure code:
-subprocess.call(["ls", user_path])'''
-            },
-            
-            'CWE-798': {
-                'guidance': (
-                    "Hardcoded Credentials Remediation:\n"
-                    "1. Move secrets to environment variables\n"
-                    "2. Use secret management systems (AWS Secrets Manager, HashiCorp Vault)\n"
-                    "3. Implement proper key rotation\n"
-                    "4. Never commit secrets to version control\n"
-                    "5. Use .gitignore for sensitive configuration files"
-                ),
-                'code_example': '''# Vulnerable code:
-API_KEY = "sk_live_1234567890abcdef"
-
-# Secure code:
-import os
-API_KEY = os.environ.get("API_KEY")'''
-            },
-            
-            'CWE-287': {
-                'guidance': (
-                    "Authentication Bypass Remediation:\n"
-                    "1. Implement proper authentication checks on all protected endpoints\n"
-                    "2. Use established authentication frameworks\n"
-                    "3. Implement multi-factor authentication (MFA)\n"
-                    "4. Use secure session management\n"
-                    "5. Implement account lockout after failed attempts"
-                ),
-                'code_example': '''# Vulnerable code:
-@app.route('/admin')
-def admin():
-    return render_template('admin.html')
-
-# Secure code:
-from flask_login import login_required
-
-@app.route('/admin')
-@login_required
-def admin():
-    if not current_user.is_admin:
-        abort(403)
-    return render_template('admin.html')'''
-            },
-            
-            'CWE-327': {
-                'guidance': (
-                    "Weak Cryptography Remediation:\n"
-                    "1. Use SHA-256 or better instead of MD5/SHA-1\n"
-                    "2. Use bcrypt, scrypt, or Argon2 for password hashing\n"
-                    "3. Use AES-256 for encryption\n"
-                    "4. Implement proper key management\n"
-                    "5. Use TLS 1.2+ for data in transit"
-                ),
-                'code_example': '''# Vulnerable code:
-import hashlib
-hash = hashlib.md5(password.encode()).hexdigest()
-
-# Secure code:
-import bcrypt
-hash = bcrypt.hashpw(password.encode(), bcrypt.gensalt())'''
-            },
-            
-            'CWE-502': {
-                'guidance': (
-                    "Insecure Deserialization Remediation:\n"
-                    "1. Avoid deserializing untrusted data\n"
-                    "2. Use safe serialization formats (JSON instead of pickle)\n"
-                    "3. Implement integrity checks (HMAC signatures)\n"
-                    "4. Use allowlists for deserializable classes\n"
-                    "5. Run deserialization in sandboxed environments"
-                ),
-                'code_example': '''# Vulnerable code:
-import pickle
-data = pickle.loads(user_input)
-
-# Secure code:
-import json
-data = json.loads(user_input)'''
-            },
-            
-            'CWE-22': {
-                'guidance': (
-                    "Path Traversal Remediation:\n"
-                    "1. Validate and sanitize file paths\n"
-                    "2. Use allowlists for permitted files/directories\n"
-                    "3. Use os.path.basename() to strip directory components\n"
-                    "4. Implement chroot jails or similar containment\n"
-                    "5. Avoid direct file system access when possible"
-                ),
-                'code_example': '''# Vulnerable code:
-with open(f"/uploads/{user_file}") as f:
-    content = f.read()
-
-# Secure code:
-import os
-safe_path = os.path.join("/uploads", os.path.basename(user_file))
-if not safe_path.startswith("/uploads/"):
-    raise ValueError("Invalid path")
-with open(safe_path) as f:
-    content = f.read()'''
-            },
-            
-            'CWE-352': {
-                'guidance': (
-                    "CSRF Remediation:\n"
-                    "1. Implement CSRF tokens for state-changing operations\n"
-                    "2. Use SameSite cookie attribute\n"
-                    "3. Verify Origin and Referer headers\n"
-                    "4. Use framework-provided CSRF protection\n"
-                    "5. Require re-authentication for sensitive operations"
-                ),
-                'code_example': '''# Vulnerable code:
-@app.route('/transfer', methods=['POST'])
-def transfer():
-    amount = request.form['amount']
-    process_transfer(amount)
-
-# Secure code:
-from flask_wtf.csrf import CSRFProtect
-csrf = CSRFProtect(app)
-
-@app.route('/transfer', methods=['POST'])
-@csrf.protect
-def transfer():
-    amount = request.form['amount']
-    process_transfer(amount)'''
-            },
-            
-            'CWE-918': {
-                'guidance': (
-                    "SSRF Remediation:\n"
-                    "1. Validate and whitelist allowed URLs/domains\n"
-                    "2. Disable redirects in HTTP clients\n"
-                    "3. Use network segmentation to limit internal access\n"
-                    "4. Implement URL parsing and validation\n"
-                    "5. Block requests to private IP ranges"
-                ),
-                'code_example': '''# Vulnerable code:
-response = requests.get(user_url)
-
-# Secure code:
-from urllib.parse import urlparse
-allowed_domains = ['api.example.com']
-parsed = urlparse(user_url)
-if parsed.netloc not in allowed_domains:
-    raise ValueError("Invalid domain")
-response = requests.get(user_url, allow_redirects=False)'''
-            }
+            "cwe": vuln.cwe,
+            "description": vuln.description,
+            "severity": vuln.severity,
+            "raw_data": vuln.raw_data,
+            "vulnerable_code": vulnerable_code
         }
+
+    def _extract_vulnerable_code(
+        self,
+        file_path: str,
+        line_start: int,
+        line_end: int
+    ) -> str:
+        """
+        Safely extract vulnerable code lines from a source file.
+        """
+        try:
+            path = Path(file_path)
+            if not path.exists():
+                return "[ERROR] Source file not found."
+
+            lines = path.read_text(encoding="utf-8", errors="ignore").splitlines()
+
+            # Line numbers are 1-based
+            extracted = lines[line_start - 1 : line_end]
+
+            return "\n".join(extracted)
+
+        except Exception as exc:
+            return f"[ERROR] Failed to extract code: {exc}"
+
+    @staticmethod
+    def serialize_for_llm(llm_context: Dict[str, Any]) -> str:
+        """
+        Serialize context to JSON for text-only LLM APIs.
+        """
+        return json.dumps(llm_context, indent=2)
