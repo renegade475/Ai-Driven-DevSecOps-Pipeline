@@ -22,7 +22,7 @@ genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 class RemediationEngine:
     """Generates remediation guidance using detailed scanner metadata and Gemini AI"""
 
-    def __init__(self, model_name: str = "gemini-1.5-flash"):
+    def __init__(self, model_name: str = "gemini-2.0-flash"):
         """
         Initialize the remediation engine with Gemini model.
         
