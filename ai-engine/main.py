@@ -106,18 +106,22 @@ class AIEngine:
         # Step 4: Prioritization
         self.log("\n[4/5] Prioritizing vulnerabilities...")
         all_vulnerabilities = self.prioritizer.prioritize(all_vulnerabilities)
-        top_priorities = self.prioritizer.get_top_priorities(all_vulnerabilities)
         priority_stats = self.prioritizer.get_statistics(all_vulnerabilities)
         
         self.log(f"  Priority 1 (Critical): {priority_stats['priority_1']}")
         self.log(f"  Priority 2 (High): {priority_stats['priority_2']}")
         self.log(f"  Priority 3 (Medium): {priority_stats['priority_3']}")
-        self.log(f"  Top {len(top_priorities)} priorities identified")
         
-        # Step 5: Generate remediation guidance
+        # Step 5: Generate remediation guidance (must run before get_top_priorities
+        # so that the same objects the prioritizer selects already have guidance set)
         self.log("\n[5/5] Generating remediation guidance...")
         all_vulnerabilities = self.remediation_engine.generate_guidance(all_vulnerabilities)
-        self.log(f"  Remediation guidance generated for {len(all_vulnerabilities)} findings")
+        remediated = sum(1 for v in all_vulnerabilities if v.remediation_guidance)
+        self.log(f"  Remediation guidance generated for top {remediated} findings")
+        
+        # Fetch top priorities AFTER remediation so guidance is already populated
+        top_priorities = self.prioritizer.get_top_priorities(all_vulnerabilities)
+        self.log(f"  Top {len(top_priorities)} priorities identified")
         
         # Create analysis report
         filtered_vulns = self.fp_detector.filter_false_positives(all_vulnerabilities)
