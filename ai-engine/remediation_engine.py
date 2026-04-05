@@ -73,15 +73,38 @@ Be specific and actionable in your response."""
         except Exception as e:
             return f"[ERROR] Failed to generate remediation with Gemini: {str(e)}"
 
-    def generate_guidance(self, vulnerabilities: List[Vulnerability]) -> List[Vulnerability]:
-        """
-        Generate remediation guidance for all vulnerabilities.
+    # Severity ranking for sorting (lower number = higher priority)
+    SEVERITY_RANK = {
+        Severity.CRITICAL: 0,
+        Severity.HIGH: 1,
+        Severity.MEDIUM: 2,
+        Severity.LOW: 3,
+        Severity.INFO: 4,
+    }
 
-        Each vulnerability gets a structured LLM context payload
-        that can be passed directly to an LLM for fix generation.
+    def generate_guidance(self, vulnerabilities: List[Vulnerability], top_n: int = 3) -> List[Vulnerability]:
         """
+        Generate remediation guidance for the top N most severe vulnerabilities.
+
+        Vulnerabilities are ranked by severity (CRITICAL > HIGH > MEDIUM > LOW > INFO)
+        with risk_score as a tiebreaker. Only the top N non-false-positive
+        vulnerabilities receive AI-generated remediation from Gemini.
+
+        Args:
+            vulnerabilities: List of detected vulnerabilities.
+            top_n: Number of top vulnerabilities to generate remediation for (default: 3).
+        """
+        # Filter out false positives, then sort by severity rank and risk score
+        actionable = [v for v in vulnerabilities if not v.is_false_positive]
+        actionable.sort(
+            key=lambda v: (self.SEVERITY_RANK.get(v.severity, 99), -v.risk_score)
+        )
+
+        # Only remediate the top N
+        top_vulns = set(id(v) for v in actionable[:top_n])
+
         for vuln in vulnerabilities:
-            if vuln.is_false_positive:
+            if id(vuln) not in top_vulns:
                 continue
 
             llm_context = self._build_llm_context(vuln)
