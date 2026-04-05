@@ -460,16 +460,16 @@ jobs:
               md_lines.append("")
               
               # Add metadata
-              md_lines.append(f"**Scan Date:** {os.popen("date -u").read().strip()}")
+              md_lines.append(f"**Scan Date:** {os.popen('date -u').read().strip()}")
               md_lines.append("")
               
               md_lines.append("## 📊 Scan Statistics")
-              md_lines.append(f"- **Total Findings:** {summary.get("total_vulnerabilities", 0)}")
-              md_lines.append(f"- **False Positive Rate:** {summary.get("false_positive_rate", 0):.1%}")
-              md_lines.append(f"- **Critical:** {summary.get("by_severity", {}).get("CRITICAL", 0)}")
-              md_lines.append(f"- **High:** {summary.get("by_severity", {}).get("HIGH", 0)}")
-              md_lines.append(f"- **Medium:** {summary.get("by_severity", {}).get("MEDIUM", 0)}")
-              md_lines.append(f"- **Low:** {summary.get("by_severity", {}).get("LOW", 0)}")
+              md_lines.append(f"- **Total Findings:** {summary.get('total_vulnerabilities', 0)}")
+              md_lines.append(f"- **False Positive Rate:** {summary.get('false_positive_rate', 0):.1%}")
+              md_lines.append(f"- **Critical:** {summary.get('by_severity', {}).get('CRITICAL', 0)}")
+              md_lines.append(f"- **High:** {summary.get('by_severity', {}).get('HIGH', 0)}")
+              md_lines.append(f"- **Medium:** {summary.get('by_severity', {}).get('MEDIUM', 0)}")
+              md_lines.append(f"- **Low:** {summary.get('by_severity', {}).get('LOW', 0)}")
               md_lines.append("")
               
               if top_priorities:
@@ -506,7 +506,7 @@ jobs:
                   
           except Exception as e:
               print(f"Error generating summary: {str(e)}")
-              # Don"t fail the build for a summary error
+              # Do not fail the build for a summary error
               sys.exit(0)
           '
           # Extract vulnerability details from AI analysis if available
