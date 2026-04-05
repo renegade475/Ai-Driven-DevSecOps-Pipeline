@@ -437,7 +437,7 @@ jobs:
           echo "- ✅ Dashboard: Built" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          python3 -c '
+          python3 << 'PYEOF'
           import json
           import os
           import sys
@@ -508,7 +508,7 @@ jobs:
               print(f"Error generating summary: {str(e)}")
               # Do not fail the build for a summary error
               sys.exit(0)
-          '
+          PYEOF
           # Extract vulnerability details from AI analysis if available
           if [ -f "aggregated/processed/ai_analysis.json" ]; then
             echo "## 🎯 Vulnerability Analysis" >> $GITHUB_STEP_SUMMARY
