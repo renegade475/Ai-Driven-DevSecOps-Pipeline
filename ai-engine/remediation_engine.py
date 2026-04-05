@@ -9,14 +9,11 @@ from pathlib import Path
 from typing import List, Dict, Any
 
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
 from models import Vulnerability, Severity
 
 # Load environment variables from .env file
 load_dotenv()
-
-# Configure Gemini API
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 
 class RemediationEngine:
@@ -25,11 +22,12 @@ class RemediationEngine:
     def __init__(self, model_name: str = "gemini-2.0-flash"):
         """
         Initialize the remediation engine with Gemini model.
-        
+
         Args:
             model_name: The Gemini model to use (default: gemini-2.0-flash)
         """
-        self.model = genai.GenerativeModel(model_name)
+        self.model_name = model_name
+        self.client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
 
     def _generate_with_gemini(self, llm_context: Dict[str, Any]) -> str:
         """
@@ -68,7 +66,10 @@ Please provide:
 Be specific and actionable in your response."""
 
         try:
-            response = self.model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=prompt
+            )
             return response.text
         except Exception as e:
             return f"[ERROR] Failed to generate remediation with Gemini: {str(e)}"
