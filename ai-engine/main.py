@@ -275,7 +275,7 @@ def main():
         )
         
         if has_blocking:
-            print(f"\n❌ Blocking severabilities found: {blocking_severities}")
+            print(f"\n❌ Blocking severities found: {blocking_severities}")
             sys.exit(1)
         else:
             print(f"\n✅ No blocking vulnerabilities found")

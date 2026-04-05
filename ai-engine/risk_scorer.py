@@ -158,8 +158,11 @@ class RiskScorer:
         owasp = vuln.owasp
         cwe = vuln.cwe
         
-        # High compliance impact for OWASP Top 10
-        if owasp and 'A0' in owasp:
+        # High compliance impact for OWASP Top 10 (A01 through A10)
+        # Use a proper substring check — 'A0' would incorrectly match all categories
+        owasp_top10_prefixes = ('A01:', 'A02:', 'A03:', 'A04:', 'A05:',
+                                'A06:', 'A07:', 'A08:', 'A09:', 'A10:')
+        if owasp and any(owasp.startswith(p) for p in owasp_top10_prefixes):
             return 1.0
         
         # Medium compliance impact for common CWEs

@@ -309,7 +309,7 @@ jobs:
   dashboard:
     name: Build Security Dashboard
     runs-on: ubuntu-latest
-    needs: [sast_scan, dast_scan]
+    needs: [sast_scan, dast_scan, ai_analysis]
     if: always()
     permissions:
       contents: read

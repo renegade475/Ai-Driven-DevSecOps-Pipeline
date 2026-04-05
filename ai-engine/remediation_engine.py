@@ -10,7 +10,7 @@ from typing import List, Dict, Any
 
 from dotenv import load_dotenv
 import google.generativeai as genai
-from models import Vulnerability
+from models import Vulnerability, Severity
 
 # Load environment variables from .env file
 load_dotenv()
@@ -27,7 +27,7 @@ class RemediationEngine:
         Initialize the remediation engine with Gemini model.
         
         Args:
-            model_name: The Gemini model to use (default: gemini-1.5-flash)
+            model_name: The Gemini model to use (default: gemini-2.0-flash)
         """
         self.model = genai.GenerativeModel(model_name)
 
@@ -114,7 +114,6 @@ Be specific and actionable in your response."""
 
             vuln.remediation_guidance = remediation
             vuln.code_example = llm_context["vulnerable_code"]
-            vuln.llm_context = llm_context  # Optional: store full context
 
         return vulnerabilities
 

@@ -244,10 +244,10 @@ class ZAPParser:
     def _map_risk_to_severity(self, risk_code: str) -> Severity:
         """Map ZAP risk code to severity"""
         mapping = {
-            '3': Severity.CRITICAL,
-            '2': Severity.HIGH,
-            '1': Severity.MEDIUM,
-            '0': Severity.LOW
+            '3': Severity.HIGH,      # ZAP's max risk level is High, not Critical
+            '2': Severity.MEDIUM,
+            '1': Severity.LOW,
+            '0': Severity.INFO
         }
         return mapping.get(str(risk_code), Severity.INFO)
     

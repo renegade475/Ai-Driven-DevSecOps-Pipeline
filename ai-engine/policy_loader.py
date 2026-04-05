@@ -5,7 +5,7 @@ Loads and validates security policy configuration from YAML
 
 import yaml
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from models import PolicyConfig
 
 
