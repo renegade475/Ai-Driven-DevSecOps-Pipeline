@@ -234,11 +234,13 @@ function App() {
     }
 
     const summary = data.summary || {};
-    const severityData = Object.entries(summary.by_severity || {}).map(([name, value]) => ({
-        name,
-        value,
-        color: getSeverityColor(name)
-    }));
+    const severityData = Object.entries(summary.by_severity || {})
+        .filter(([name, value]) => name !== 'INFO' && value > 0)
+        .map(([name, value]) => ({
+            name,
+            value,
+            color: getSeverityColor(name)
+        }));
 
     const sourceData = Object.entries(summary.by_source || {}).map(([name, value]) => ({
         name,
