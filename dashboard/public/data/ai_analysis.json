@@ -1,68 +1,257 @@
 {
-  "report_id": "ai_analysis_20260121_051104",
-  "generated_at": "2026-01-21T05:11:04.368086",
+  "report_id": "ai_analysis_20260406_162224",
+  "generated_at": "2026-04-06T16:22:24.927599",
   "policy": {
     "name": "Enterprise Security Policy",
     "version": "1.0"
   },
   "summary": {
-    "total_vulnerabilities": 67,
-    "filtered_vulnerabilities": 67,
+    "total_vulnerabilities": 71,
+    "filtered_vulnerabilities": 71,
     "false_positives": 0,
     "false_positive_rate": 0.0,
     "by_severity": {
-      "CRITICAL": 3,
-      "HIGH": 16,
+      "CRITICAL": 6,
+      "HIGH": 17,
       "MEDIUM": 46,
       "LOW": 2,
       "INFO": 0
     },
     "by_source": {
       "SAST": 67,
-      "DAST": 0
+      "DAST": 4
     },
     "risk_statistics": {
-      "average_risk_score": 0.55,
-      "max_risk_score": 0.805,
-      "min_risk_score": 0.365,
-      "high_risk_count": 3,
-      "medium_risk_count": 62,
+      "average_risk_score": 0.638,
+      "max_risk_score": 1.0,
+      "min_risk_score": 0.395,
+      "high_risk_count": 24,
+      "medium_risk_count": 45,
       "low_risk_count": 2
     },
     "priority_statistics": {
-      "priority_1": 2,
-      "priority_2": 4,
-      "priority_3": 21,
-      "priority_4": 40,
+      "priority_1": 7,
+      "priority_2": 17,
+      "priority_3": 45,
+      "priority_4": 2,
       "priority_5": 0,
       "low_effort": 3,
-      "medium_effort": 63,
+      "medium_effort": 67,
       "high_effort": 1,
-      "total_prioritized": 67
+      "total_prioritized": 71
     },
     "top_priorities_count": 20
   },
   "vulnerabilities": {
-    "total": 67,
-    "filtered": 67,
+    "total": 71,
+    "filtered": 71,
     "top_priorities": 20,
     "by_severity": {
-      "CRITICAL": 0,
-      "HIGH": 18,
-      "MEDIUM": 47,
+      "CRITICAL": 6,
+      "HIGH": 17,
+      "MEDIUM": 46,
       "LOW": 2,
       "INFO": 0
     },
     "by_source": {
       "SAST": 67,
-      "DAST": 0,
+      "DAST": 4,
       "MANUAL": 0
     },
     "by_type": {
-      "OTHER": 67
+      "OTHER": 71
     }
   },
   "top_priorities": [
+    {
+      "id": "86595c99f9f3fc1d",
+      "title": "SQL Injection",
+      "description": "SQL injection may be possible.",
+      "severity": "CRITICAL",
+      "source": "DAST",
+      "location": {
+        "file": "",
+        "line_start": null,
+        "line_end": null,
+        "url": "http://localhost:5000/login",
+        "method": "POST",
+        "parameter": "username"
+      },
+      "cwe": "CWE-89",
+      "owasp": "A03:2021-Injection",
+      "confidence": 0.7,
+      "risk_score": 1.0,
+      "priority": 1,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "SQL Injection Remediation:\n1. Use parameterized queries (prepared statements) instead of string concatenation\n2. Use ORM frameworks with built-in protection\n3. Implement input validation and sanitization\n4. Apply principle of least privilege for database accounts\n5. Use stored procedures with parameterized inputs",
+        "code_example": "# Vulnerable code:\nquery = f\"SELECT * FROM users WHERE id = {user_id}\"\ncursor.execute(query)\n\n# Secure code:\nquery = \"SELECT * FROM users WHERE id = ?\"\ncursor.execute(query, (user_id,))",
+        "effort": "MEDIUM",
+        "sla_days": 7
+      },
+      "tags": [
+        "40018"
+      ],
+      "references": [
+        "https://owasp.org/www-community/attacks/SQL_Injection"
+      ]
+    },
+    {
+      "id": "e5a0a9bbcce82b6f",
+      "title": "Remote OS Command Injection",
+      "description": "Command injection may be possible.",
+      "severity": "CRITICAL",
+      "source": "DAST",
+      "location": {
+        "file": "",
+        "line_start": null,
+        "line_end": null,
+        "url": "http://localhost:5000/ping",
+        "method": "POST",
+        "parameter": "host"
+      },
+      "cwe": "CWE-78",
+      "owasp": "A03:2021-Injection",
+      "confidence": 0.7,
+      "risk_score": 0.955,
+      "priority": 1,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "Command Injection Remediation:\n1. Avoid shell=True in subprocess calls\n2. Use subprocess with argument lists instead of shell commands\n3. Validate and whitelist allowed commands\n4. Use libraries instead of shell commands when possible\n5. Implement strict input validation",
+        "code_example": "# Vulnerable code:\nsubprocess.call(f\"ls {user_path}\", shell=True)\n\n# Secure code:\nsubprocess.call([\"ls\", user_path])",
+        "effort": "MEDIUM",
+        "sla_days": 7
+      },
+      "tags": [
+        "90020"
+      ],
+      "references": [
+        "https://owasp.org/www-project-web-security-testing-guide/"
+      ]
+    },
+    {
+      "id": "3a2ad944388179da",
+      "title": "semgrep-rules.python-pickle-unsafe",
+      "description": "Insecure deserialization: pickle can execute arbitrary code",
+      "severity": "CRITICAL",
+      "source": "SAST",
+      "location": {
+        "file": "Vulnerable_app/app.py",
+        "line_start": 297,
+        "line_end": 297,
+        "url": null,
+        "method": null,
+        "parameter": null
+      },
+      "cwe": "CWE-502",
+      "owasp": [
+        "A8:2017-Insecure Deserialization",
+        "A08:2021-Software and Data Integrity Failures",
+        "A08:2025-Software or Data Integrity Failures"
+      ],
+      "confidence": 0.7,
+      "risk_score": 0.91,
+      "priority": 1,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "Insecure Deserialization Remediation:\n1. Avoid deserializing untrusted data\n2. Use safe serialization formats (JSON instead of pickle)\n3. Implement integrity checks (HMAC signatures)\n4. Use allowlists for deserializable classes\n5. Run deserialization in sandboxed environments",
+        "code_example": "# Vulnerable code:\nimport pickle\ndata = pickle.loads(user_input)\n\n# Secure code:\nimport json\ndata = json.loads(user_input)",
+        "effort": "HIGH",
+        "sla_days": 7
+      },
+      "tags": [
+        "security"
+      ],
+      "references": []
+    },
+    {
+      "id": "56b6b7362f48b84d",
+      "title": "python.flask.security.insecure-deserialization.insecure-deserialization",
+      "description": "Detected the use of an insecure deserialization library in a Flask route. These libraries are prone to code execution vulnerabilities. Ensure user data does not enter this function. To fix this, try to avoid serializing whole objects. Consider instead using a serializer such as JSON.",
+      "severity": "CRITICAL",
+      "source": "SAST",
+      "location": {
+        "file": "Vulnerable_app/app.py",
+        "line_start": 297,
+        "line_end": 297,
+        "url": null,
+        "method": null,
+        "parameter": null
+      },
+      "cwe": [
+        "CWE-502: Deserialization of Untrusted Data"
+      ],
+      "owasp": [
+        "A08:2017 - Insecure Deserialization",
+        "A08:2021 - Software and Data Integrity Failures",
+        "A08:2025 - Software or Data Integrity Failures"
+      ],
+      "confidence": 0.5,
+      "risk_score": 0.91,
+      "priority": 1,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "Review and remediate this CRITICAL severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.insecure-deserialization.insecure-deserialization. Consider the business impact and prioritize accordingly.",
+        "code_example": null,
+        "effort": "MEDIUM",
+        "sla_days": 7
+      },
+      "tags": [
+        "security"
+      ],
+      "references": [
+        "https://docs.python.org/3/library/pickle.html"
+      ]
+    },
+    {
+      "id": "70a110c9175d77f7",
+      "title": "python.lang.security.deserialization.pickle.avoid-pickle",
+      "description": "Avoid using `pickle`, which is known to lead to code execution vulnerabilities. When unpickling, the serialized data could be manipulated to run arbitrary code. Instead, consider serializing the relevant data as JSON or a similar text-based serialization format.",
+      "severity": "CRITICAL",
+      "source": "SAST",
+      "location": {
+        "file": "Vulnerable_app/app.py",
+        "line_start": 297,
+        "line_end": 297,
+        "url": null,
+        "method": null,
+        "parameter": null
+      },
+      "cwe": [
+        "CWE-502: Deserialization of Untrusted Data"
+      ],
+      "owasp": [
+        "A08:2017 - Insecure Deserialization",
+        "A08:2021 - Software and Data Integrity Failures",
+        "A08:2025 - Software or Data Integrity Failures"
+      ],
+      "confidence": 0.5,
+      "risk_score": 0.91,
+      "priority": 1,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "Review and remediate this CRITICAL severity vulnerability. Consult security best practices and OWASP guidelines for python.lang.security.deserialization.pickle.avoid-pickle. Consider the business impact and prioritize accordingly.",
+        "code_example": null,
+        "effort": "MEDIUM",
+        "sla_days": 7
+      },
+      "tags": [
+        "security"
+      ],
+      "references": [
+        "https://docs.python.org/3/library/pickle.html"
+      ]
+    },
     {
       "id": "6123023800bf66fa",
       "title": "semgrep-rules.python-sql-injection-format",
@@ -84,7 +273,7 @@
         "A05:2025-Injection"
       ],
       "confidence": 0.7,
-      "risk_score": 0.805,
+      "risk_score": 0.835,
       "priority": 1,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
@@ -121,7 +310,7 @@
         "A07:2025-Authentication Failures"
       ],
       "confidence": 0.7,
-      "risk_score": 0.73,
+      "risk_score": 0.76,
       "priority": 1,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
@@ -136,235 +325,6 @@
         "security"
       ],
       "references": []
-    },
-    {
-      "id": "3a2ad944388179da",
-      "title": "semgrep-rules.python-pickle-unsafe",
-      "description": "Insecure deserialization: pickle can execute arbitrary code",
-      "severity": "CRITICAL",
-      "source": "SAST",
-      "location": {
-        "file": "Vulnerable_app/app.py",
-        "line_start": 297,
-        "line_end": 297,
-        "url": null,
-        "method": null,
-        "parameter": null
-      },
-      "cwe": "CWE-502",
-      "owasp": [
-        "A8:2017-Insecure Deserialization",
-        "A08:2021-Software and Data Integrity Failures",
-        "A08:2025-Software or Data Integrity Failures"
-      ],
-      "confidence": 0.7,
-      "risk_score": 0.805,
-      "priority": 2,
-      "is_false_positive": false,
-      "false_positive_confidence": 0.0,
-      "false_positive_reason": "No false positive indicators",
-      "remediation": {
-        "guidance": "Insecure Deserialization Remediation:\n1. Avoid deserializing untrusted data\n2. Use safe serialization formats (JSON instead of pickle)\n3. Implement integrity checks (HMAC signatures)\n4. Use allowlists for deserializable classes\n5. Run deserialization in sandboxed environments",
-        "code_example": "# Vulnerable code:\nimport pickle\ndata = pickle.loads(user_input)\n\n# Secure code:\nimport json\ndata = json.loads(user_input)",
-        "effort": "HIGH",
-        "sla_days": 14
-      },
-      "tags": [
-        "security"
-      ],
-      "references": []
-    },
-    {
-      "id": "fff6d8762bc05b3e",
-      "title": "semgrep-rules.python-flask-render-template-string",
-      "description": "XSS: render_template_string with non-constant template",
-      "severity": "HIGH",
-      "source": "SAST",
-      "location": {
-        "file": "Vulnerable_app/app.py",
-        "line_start": 136,
-        "line_end": 136,
-        "url": null,
-        "method": null,
-        "parameter": null
-      },
-      "cwe": "CWE-79",
-      "owasp": [
-        "A7:2017-Cross-Site Scripting (XSS)",
-        "A03:2021-Injection"
-      ],
-      "confidence": 0.7,
-      "risk_score": 0.68,
-      "priority": 2,
-      "is_false_positive": false,
-      "false_positive_confidence": 0.0,
-      "false_positive_reason": "No false positive indicators",
-      "remediation": {
-        "guidance": "Cross-Site Scripting (XSS) Remediation:\n1. Enable auto-escaping in template engines\n2. Use Content Security Policy (CSP) headers\n3. Sanitize user input before rendering\n4. Use framework-provided escaping functions\n5. Validate and encode output based on context (HTML, JavaScript, URL)",
-        "code_example": "# Vulnerable code:\nreturn render_template_string(f\"<h1>Hello {user_input}</h1>\")\n\n# Secure code:\nfrom markupsafe import escape\nreturn render_template_string(f\"<h1>Hello {escape(user_input)}</h1>\")",
-        "effort": "MEDIUM",
-        "sla_days": 14
-      },
-      "tags": [
-        "security"
-      ],
-      "references": []
-    },
-    {
-      "id": "1111d98b81464f65",
-      "title": "semgrep-rules.python-flask-render-template-string",
-      "description": "XSS: render_template_string with non-constant template",
-      "severity": "HIGH",
-      "source": "SAST",
-      "location": {
-        "file": "Vulnerable_app/app.py",
-        "line_start": 174,
-        "line_end": 174,
-        "url": null,
-        "method": null,
-        "parameter": null
-      },
-      "cwe": "CWE-79",
-      "owasp": [
-        "A7:2017-Cross-Site Scripting (XSS)",
-        "A03:2021-Injection"
-      ],
-      "confidence": 0.7,
-      "risk_score": 0.68,
-      "priority": 2,
-      "is_false_positive": false,
-      "false_positive_confidence": 0.0,
-      "false_positive_reason": "No false positive indicators",
-      "remediation": {
-        "guidance": "Cross-Site Scripting (XSS) Remediation:\n1. Enable auto-escaping in template engines\n2. Use Content Security Policy (CSP) headers\n3. Sanitize user input before rendering\n4. Use framework-provided escaping functions\n5. Validate and encode output based on context (HTML, JavaScript, URL)",
-        "code_example": "# Vulnerable code:\nreturn render_template_string(f\"<h1>Hello {user_input}</h1>\")\n\n# Secure code:\nfrom markupsafe import escape\nreturn render_template_string(f\"<h1>Hello {escape(user_input)}</h1>\")",
-        "effort": "MEDIUM",
-        "sla_days": 14
-      },
-      "tags": [
-        "security"
-      ],
-      "references": []
-    },
-    {
-      "id": "ddd91d5f69392a15",
-      "title": "semgrep-rules.python-flask-render-template-string",
-      "description": "XSS: render_template_string with non-constant template",
-      "severity": "HIGH",
-      "source": "SAST",
-      "location": {
-        "file": "Vulnerable_app/app.py",
-        "line_start": 341,
-        "line_end": 341,
-        "url": null,
-        "method": null,
-        "parameter": null
-      },
-      "cwe": "CWE-79",
-      "owasp": [
-        "A7:2017-Cross-Site Scripting (XSS)",
-        "A03:2021-Injection"
-      ],
-      "confidence": 0.7,
-      "risk_score": 0.68,
-      "priority": 2,
-      "is_false_positive": false,
-      "false_positive_confidence": 0.0,
-      "false_positive_reason": "No false positive indicators",
-      "remediation": {
-        "guidance": "Cross-Site Scripting (XSS) Remediation:\n1. Enable auto-escaping in template engines\n2. Use Content Security Policy (CSP) headers\n3. Sanitize user input before rendering\n4. Use framework-provided escaping functions\n5. Validate and encode output based on context (HTML, JavaScript, URL)",
-        "code_example": "# Vulnerable code:\nreturn render_template_string(f\"<h1>Hello {user_input}</h1>\")\n\n# Secure code:\nfrom markupsafe import escape\nreturn render_template_string(f\"<h1>Hello {escape(user_input)}</h1>\")",
-        "effort": "MEDIUM",
-        "sla_days": 14
-      },
-      "tags": [
-        "security"
-      ],
-      "references": []
-    },
-    {
-      "id": "c88fa88210d2f743",
-      "title": "python.flask.security.injection.tainted-sql-string.tainted-sql-string",
-      "description": "Detected user input used to manually construct a SQL string. This is usually bad practice because manual construction could accidentally result in a SQL injection. An attacker could use a SQL injection to steal or modify contents of the database. Instead, use a parameterized query which is available by default in most database engines. Alternatively, consider using an object-relational mapper (ORM) such as SQLAlchemy which will protect your queries.",
-      "severity": "HIGH",
-      "source": "SAST",
-      "location": {
-        "file": "Vulnerable_app/app.py",
-        "line_start": 87,
-        "line_end": 87,
-        "url": null,
-        "method": null,
-        "parameter": null
-      },
-      "cwe": [
-        "CWE-704: Incorrect Type Conversion or Cast"
-      ],
-      "owasp": [
-        "A01:2017 - Injection",
-        "A03:2021 - Injection",
-        "A05:2025 - Injection"
-      ],
-      "confidence": 0.7,
-      "risk_score": 0.69,
-      "priority": 3,
-      "is_false_positive": false,
-      "false_positive_confidence": 0.0,
-      "false_positive_reason": "No false positive indicators",
-      "remediation": {
-        "guidance": "Review and remediate this HIGH severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.injection.tainted-sql-string.tainted-sql-string. Consider the business impact and prioritize accordingly.",
-        "code_example": null,
-        "effort": "MEDIUM",
-        "sla_days": 30
-      },
-      "tags": [
-        "security"
-      ],
-      "references": [
-        "https://docs.sqlalchemy.org/en/14/core/tutorial.html#using-textual-sql",
-        "https://www.tutorialspoint.com/sqlalchemy/sqlalchemy_quick_guide.htm",
-        "https://docs.sqlalchemy.org/en/14/core/tutorial.html#using-more-specific-text-with-table-expression-literal-column-and-expression-column"
-      ]
-    },
-    {
-      "id": "cf585d679bd2b9ea",
-      "title": "python.flask.security.dangerous-template-string.dangerous-template-string",
-      "description": "Found a template created with string formatting. This is susceptible to server-side template injection and cross-site scripting attacks.",
-      "severity": "HIGH",
-      "source": "SAST",
-      "location": {
-        "file": "Vulnerable_app/app.py",
-        "line_start": 127,
-        "line_end": 136,
-        "url": null,
-        "method": null,
-        "parameter": null
-      },
-      "cwe": [
-        "CWE-96: Improper Neutralization of Directives in Statically Saved Code ('Static Code Injection')"
-      ],
-      "owasp": [
-        "A03:2021 - Injection",
-        "A05:2025 - Injection"
-      ],
-      "confidence": 0.5,
-      "risk_score": 0.69,
-      "priority": 3,
-      "is_false_positive": false,
-      "false_positive_confidence": 0.0,
-      "false_positive_reason": "No false positive indicators",
-      "remediation": {
-        "guidance": "Review and remediate this HIGH severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.dangerous-template-string.dangerous-template-string. Consider the business impact and prioritize accordingly.",
-        "code_example": null,
-        "effort": "MEDIUM",
-        "sla_days": 30
-      },
-      "tags": [
-        "security"
-      ],
-      "references": [
-        "https://nvisium.com/blog/2016/03/09/exploring-ssti-in-flask-jinja2.html",
-        "https://pequalsnp-team.github.io/cheatsheet/flask-jinja2-ssti"
-      ]
     },
     {
       "id": "8a81a64ded78ba5e",
@@ -389,8 +349,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.9,
-      "risk_score": 0.69,
-      "priority": 3,
+      "risk_score": 0.835,
+      "priority": 2,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -398,7 +358,7 @@
         "guidance": "Review and remediate this HIGH severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.injection.subprocess-injection.subprocess-injection. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 30
+        "sla_days": 14
       },
       "tags": [
         "security"
@@ -430,8 +390,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.7,
-      "risk_score": 0.69,
-      "priority": 3,
+      "risk_score": 0.835,
+      "priority": 2,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -439,7 +399,7 @@
         "guidance": "Review and remediate this HIGH severity vulnerability. Consult security best practices and OWASP guidelines for python.lang.security.dangerous-subprocess-use.dangerous-subprocess-use. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 30
+        "sla_days": 14
       },
       "tags": [
         "security"
@@ -474,8 +434,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.7,
-      "risk_score": 0.69,
-      "priority": 3,
+      "risk_score": 0.835,
+      "priority": 2,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -483,7 +443,7 @@
         "guidance": "Review and remediate this HIGH severity vulnerability. Consult security best practices and OWASP guidelines for python.lang.security.audit.subprocess-shell-true.subprocess-shell-true. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 30
+        "sla_days": 14
       },
       "tags": [
         "security"
@@ -491,6 +451,283 @@
       "references": [
         "https://stackoverflow.com/questions/3172470/actual-meaning-of-shell-true-in-subprocess",
         "https://docs.python.org/3/library/subprocess.html"
+      ]
+    },
+    {
+      "id": "004b1d8b6a64f4a1",
+      "title": "Cross Site Scripting (Reflected)",
+      "description": "Cross-site Scripting (XSS) is possible.",
+      "severity": "CRITICAL",
+      "source": "DAST",
+      "location": {
+        "file": "",
+        "line_start": null,
+        "line_end": null,
+        "url": "http://localhost:5000/search",
+        "method": "POST",
+        "parameter": "search"
+      },
+      "cwe": "CWE-79",
+      "owasp": "A03:2021-Injection",
+      "confidence": 0.7,
+      "risk_score": 0.83,
+      "priority": 2,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "Cross-Site Scripting (XSS) Remediation:\n1. Enable auto-escaping in template engines\n2. Use Content Security Policy (CSP) headers\n3. Sanitize user input before rendering\n4. Use framework-provided escaping functions\n5. Validate and encode output based on context (HTML, JavaScript, URL)",
+        "code_example": "# Vulnerable code:\nreturn render_template_string(f\"<h1>Hello {user_input}</h1>\")\n\n# Secure code:\nfrom markupsafe import escape\nreturn render_template_string(f\"<h1>Hello {escape(user_input)}</h1>\")",
+        "effort": "MEDIUM",
+        "sla_days": 14
+      },
+      "tags": [
+        "40012"
+      ],
+      "references": [
+        "https://owasp.org/www-community/attacks/xss/"
+      ]
+    },
+    {
+      "id": "7a69f37fa33b907f",
+      "title": "python.django.security.injection.sql.sql-injection-using-db-cursor-execute.sql-injection-db-cursor-execute",
+      "description": "User-controlled data from a request is passed to 'execute()'. This could lead to a SQL injection and therefore protected information could be leaked. Instead, use django's QuerySets, which are built with query parameterization and therefore not vulnerable to sql injection. For example, you could use `Entry.objects.filter(date=2006)`.",
+      "severity": "MEDIUM",
+      "source": "SAST",
+      "location": {
+        "file": "Vulnerable_app/app.py",
+        "line_start": 81,
+        "line_end": 103,
+        "url": null,
+        "method": null,
+        "parameter": null
+      },
+      "cwe": [
+        "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')"
+      ],
+      "owasp": [
+        "A01:2017 - Injection",
+        "A03:2021 - Injection",
+        "A05:2025 - Injection"
+      ],
+      "confidence": 0.7,
+      "risk_score": 0.76,
+      "priority": 2,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.django.security.injection.sql.sql-injection-using-db-cursor-execute.sql-injection-db-cursor-execute. Consider the business impact and prioritize accordingly.",
+        "code_example": null,
+        "effort": "MEDIUM",
+        "sla_days": 14
+      },
+      "tags": [
+        "security"
+      ],
+      "references": [
+        "https://docs.djangoproject.com/en/3.0/topics/security/#sql-injection-protection"
+      ]
+    },
+    {
+      "id": "b0b1d4c6d6d96243",
+      "title": "python.django.security.injection.sql.sql-injection-using-db-cursor-execute.sql-injection-db-cursor-execute",
+      "description": "User-controlled data from a request is passed to 'execute()'. This could lead to a SQL injection and therefore protected information could be leaked. Instead, use django's QuerySets, which are built with query parameterization and therefore not vulnerable to sql injection. For example, you could use `Entry.objects.filter(date=2006)`.",
+      "severity": "MEDIUM",
+      "source": "SAST",
+      "location": {
+        "file": "Vulnerable_app/app.py",
+        "line_start": 82,
+        "line_end": 103,
+        "url": null,
+        "method": null,
+        "parameter": null
+      },
+      "cwe": [
+        "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')"
+      ],
+      "owasp": [
+        "A01:2017 - Injection",
+        "A03:2021 - Injection",
+        "A05:2025 - Injection"
+      ],
+      "confidence": 0.7,
+      "risk_score": 0.76,
+      "priority": 2,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.django.security.injection.sql.sql-injection-using-db-cursor-execute.sql-injection-db-cursor-execute. Consider the business impact and prioritize accordingly.",
+        "code_example": null,
+        "effort": "MEDIUM",
+        "sla_days": 14
+      },
+      "tags": [
+        "security"
+      ],
+      "references": [
+        "https://docs.djangoproject.com/en/3.0/topics/security/#sql-injection-protection"
+      ]
+    },
+    {
+      "id": "d2b23de099588a34",
+      "title": "python.django.security.injection.sql.sql-injection-using-db-cursor-execute.sql-injection-db-cursor-execute",
+      "description": "User-controlled data from a request is passed to 'execute()'. This could lead to a SQL injection and therefore protected information could be leaked. Instead, use django's QuerySets, which are built with query parameterization and therefore not vulnerable to sql injection. For example, you could use `Entry.objects.filter(date=2006)`.",
+      "severity": "MEDIUM",
+      "source": "SAST",
+      "location": {
+        "file": "Vulnerable_app/app.py",
+        "line_start": 258,
+        "line_end": 273,
+        "url": null,
+        "method": null,
+        "parameter": null
+      },
+      "cwe": [
+        "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')"
+      ],
+      "owasp": [
+        "A01:2017 - Injection",
+        "A03:2021 - Injection",
+        "A05:2025 - Injection"
+      ],
+      "confidence": 0.7,
+      "risk_score": 0.76,
+      "priority": 2,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.django.security.injection.sql.sql-injection-using-db-cursor-execute.sql-injection-db-cursor-execute. Consider the business impact and prioritize accordingly.",
+        "code_example": null,
+        "effort": "MEDIUM",
+        "sla_days": 14
+      },
+      "tags": [
+        "security"
+      ],
+      "references": [
+        "https://docs.djangoproject.com/en/3.0/topics/security/#sql-injection-protection"
+      ]
+    },
+    {
+      "id": "3f39c2cfc0d22f48",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "No Anti-CSRF tokens were found in a HTML submission form.",
+      "severity": "HIGH",
+      "source": "DAST",
+      "location": {
+        "file": "",
+        "line_start": null,
+        "line_end": null,
+        "url": "http://localhost:5000/transfer",
+        "method": "POST",
+        "parameter": ""
+      },
+      "cwe": "CWE-352",
+      "owasp": "A01:2021-Broken Access Control",
+      "confidence": 0.7,
+      "risk_score": 0.755,
+      "priority": 2,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "CSRF Remediation:\n1. Implement CSRF tokens for state-changing operations\n2. Use SameSite cookie attribute\n3. Verify Origin and Referer headers\n4. Use framework-provided CSRF protection\n5. Require re-authentication for sensitive operations",
+        "code_example": "# Vulnerable code:\n@app.route('/transfer', methods=['POST'])\ndef transfer():\n    amount = request.form['amount']\n    process_transfer(amount)\n\n# Secure code:\nfrom flask_wtf.csrf import CSRFProtect\ncsrf = CSRFProtect(app)\n\n@app.route('/transfer', methods=['POST'])\n@csrf.protect\ndef transfer():\n    amount = request.form['amount']\n    process_transfer(amount)",
+        "effort": "MEDIUM",
+        "sla_days": 14
+      },
+      "tags": [
+        "10202"
+      ],
+      "references": [
+        "https://owasp.org/www-community/attacks/csrf"
+      ]
+    },
+    {
+      "id": "c88fa88210d2f743",
+      "title": "python.flask.security.injection.tainted-sql-string.tainted-sql-string",
+      "description": "Detected user input used to manually construct a SQL string. This is usually bad practice because manual construction could accidentally result in a SQL injection. An attacker could use a SQL injection to steal or modify contents of the database. Instead, use a parameterized query which is available by default in most database engines. Alternatively, consider using an object-relational mapper (ORM) such as SQLAlchemy which will protect your queries.",
+      "severity": "HIGH",
+      "source": "SAST",
+      "location": {
+        "file": "Vulnerable_app/app.py",
+        "line_start": 87,
+        "line_end": 87,
+        "url": null,
+        "method": null,
+        "parameter": null
+      },
+      "cwe": [
+        "CWE-704: Incorrect Type Conversion or Cast"
+      ],
+      "owasp": [
+        "A01:2017 - Injection",
+        "A03:2021 - Injection",
+        "A05:2025 - Injection"
+      ],
+      "confidence": 0.7,
+      "risk_score": 0.72,
+      "priority": 2,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "Review and remediate this HIGH severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.injection.tainted-sql-string.tainted-sql-string. Consider the business impact and prioritize accordingly.",
+        "code_example": null,
+        "effort": "MEDIUM",
+        "sla_days": 14
+      },
+      "tags": [
+        "security"
+      ],
+      "references": [
+        "https://docs.sqlalchemy.org/en/14/core/tutorial.html#using-textual-sql",
+        "https://www.tutorialspoint.com/sqlalchemy/sqlalchemy_quick_guide.htm",
+        "https://docs.sqlalchemy.org/en/14/core/tutorial.html#using-more-specific-text-with-table-expression-literal-column-and-expression-column"
+      ]
+    },
+    {
+      "id": "cf585d679bd2b9ea",
+      "title": "python.flask.security.dangerous-template-string.dangerous-template-string",
+      "description": "Found a template created with string formatting. This is susceptible to server-side template injection and cross-site scripting attacks.",
+      "severity": "HIGH",
+      "source": "SAST",
+      "location": {
+        "file": "Vulnerable_app/app.py",
+        "line_start": 127,
+        "line_end": 136,
+        "url": null,
+        "method": null,
+        "parameter": null
+      },
+      "cwe": [
+        "CWE-96: Improper Neutralization of Directives in Statically Saved Code ('Static Code Injection')"
+      ],
+      "owasp": [
+        "A03:2021 - Injection",
+        "A05:2025 - Injection"
+      ],
+      "confidence": 0.5,
+      "risk_score": 0.72,
+      "priority": 2,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "Review and remediate this HIGH severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.dangerous-template-string.dangerous-template-string. Consider the business impact and prioritize accordingly.",
+        "code_example": null,
+        "effort": "MEDIUM",
+        "sla_days": 14
+      },
+      "tags": [
+        "security"
+      ],
+      "references": [
+        "https://nvisium.com/blog/2016/03/09/exploring-ssti-in-flask-jinja2.html",
+        "https://pequalsnp-team.github.io/cheatsheet/flask-jinja2-ssti"
       ]
     },
     {
@@ -515,8 +752,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.5,
-      "risk_score": 0.69,
-      "priority": 3,
+      "risk_score": 0.72,
+      "priority": 2,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -524,7 +761,7 @@
         "guidance": "Review and remediate this HIGH severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.dangerous-template-string.dangerous-template-string. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 30
+        "sla_days": 14
       },
       "tags": [
         "security"
@@ -557,8 +794,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.7,
-      "risk_score": 0.69,
-      "priority": 3,
+      "risk_score": 0.72,
+      "priority": 2,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -566,7 +803,7 @@
         "guidance": "Review and remediate this HIGH severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.injection.tainted-sql-string.tainted-sql-string. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 30
+        "sla_days": 14
       },
       "tags": [
         "security"
@@ -575,127 +812,6 @@
         "https://docs.sqlalchemy.org/en/14/core/tutorial.html#using-textual-sql",
         "https://www.tutorialspoint.com/sqlalchemy/sqlalchemy_quick_guide.htm",
         "https://docs.sqlalchemy.org/en/14/core/tutorial.html#using-more-specific-text-with-table-expression-literal-column-and-expression-column"
-      ]
-    },
-    {
-      "id": "56b6b7362f48b84d",
-      "title": "python.flask.security.insecure-deserialization.insecure-deserialization",
-      "description": "Detected the use of an insecure deserialization library in a Flask route. These libraries are prone to code execution vulnerabilities. Ensure user data does not enter this function. To fix this, try to avoid serializing whole objects. Consider instead using a serializer such as JSON.",
-      "severity": "CRITICAL",
-      "source": "SAST",
-      "location": {
-        "file": "Vulnerable_app/app.py",
-        "line_start": 297,
-        "line_end": 297,
-        "url": null,
-        "method": null,
-        "parameter": null
-      },
-      "cwe": [
-        "CWE-502: Deserialization of Untrusted Data"
-      ],
-      "owasp": [
-        "A08:2017 - Insecure Deserialization",
-        "A08:2021 - Software and Data Integrity Failures",
-        "A08:2025 - Software or Data Integrity Failures"
-      ],
-      "confidence": 0.5,
-      "risk_score": 0.69,
-      "priority": 3,
-      "is_false_positive": false,
-      "false_positive_confidence": 0.0,
-      "false_positive_reason": "No false positive indicators",
-      "remediation": {
-        "guidance": "Review and remediate this HIGH severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.insecure-deserialization.insecure-deserialization. Consider the business impact and prioritize accordingly.",
-        "code_example": null,
-        "effort": "MEDIUM",
-        "sla_days": 30
-      },
-      "tags": [
-        "security"
-      ],
-      "references": [
-        "https://docs.python.org/3/library/pickle.html"
-      ]
-    },
-    {
-      "id": "0be868120c4ee516",
-      "title": "python.django.security.injection.ssrf.ssrf-injection-requests.ssrf-injection-requests",
-      "description": "Data from request object is passed to a new server-side request. This could lead to a server-side request forgery (SSRF). To mitigate, ensure that schemes and hosts are validated against an allowlist, do not forward the response to the user, and ensure proper authentication and transport-layer security in the proxied request. See https://owasp.org/www-community/attacks/Server_Side_Request_Forgery to learn more about SSRF vulnerabilities.",
-      "severity": "HIGH",
-      "source": "SAST",
-      "location": {
-        "file": "Vulnerable_app/app.py",
-        "line_start": 315,
-        "line_end": 322,
-        "url": null,
-        "method": null,
-        "parameter": null
-      },
-      "cwe": [
-        "CWE-918: Server-Side Request Forgery (SSRF)"
-      ],
-      "owasp": [
-        "A10:2021 - Server-Side Request Forgery (SSRF)",
-        "A01:2025 - Broken Access Control"
-      ],
-      "confidence": 0.7,
-      "risk_score": 0.69,
-      "priority": 3,
-      "is_false_positive": false,
-      "false_positive_confidence": 0.0,
-      "false_positive_reason": "No false positive indicators",
-      "remediation": {
-        "guidance": "Review and remediate this HIGH severity vulnerability. Consult security best practices and OWASP guidelines for python.django.security.injection.ssrf.ssrf-injection-requests.ssrf-injection-requests. Consider the business impact and prioritize accordingly.",
-        "code_example": null,
-        "effort": "MEDIUM",
-        "sla_days": 30
-      },
-      "tags": [
-        "security"
-      ],
-      "references": [
-        "https://owasp.org/www-community/attacks/Server_Side_Request_Forgery"
-      ]
-    },
-    {
-      "id": "124c679a395bbb98",
-      "title": "python.flask.security.injection.ssrf-requests.ssrf-requests",
-      "description": "Data from request object is passed to a new server-side request. This could lead to a server-side request forgery (SSRF). To mitigate, ensure that schemes and hosts are validated against an allowlist, do not forward the response to the user, and ensure proper authentication and transport-layer security in the proxied request.",
-      "severity": "HIGH",
-      "source": "SAST",
-      "location": {
-        "file": "Vulnerable_app/app.py",
-        "line_start": 319,
-        "line_end": 319,
-        "url": null,
-        "method": null,
-        "parameter": null
-      },
-      "cwe": [
-        "CWE-918: Server-Side Request Forgery (SSRF)"
-      ],
-      "owasp": [
-        "A10:2021 - Server-Side Request Forgery (SSRF)",
-        "A01:2025 - Broken Access Control"
-      ],
-      "confidence": 0.7,
-      "risk_score": 0.69,
-      "priority": 3,
-      "is_false_positive": false,
-      "false_positive_confidence": 0.0,
-      "false_positive_reason": "No false positive indicators",
-      "remediation": {
-        "guidance": "Review and remediate this HIGH severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.injection.ssrf-requests.ssrf-requests. Consider the business impact and prioritize accordingly.",
-        "code_example": null,
-        "effort": "MEDIUM",
-        "sla_days": 30
-      },
-      "tags": [
-        "security"
-      ],
-      "references": [
-        "https://owasp.org/www-community/attacks/Server_Side_Request_Forgery"
       ]
     },
     {
@@ -721,8 +837,8 @@
         "A07:2025 - Authentication Failures"
       ],
       "confidence": 0.5,
-      "risk_score": 0.69,
-      "priority": 3,
+      "risk_score": 0.72,
+      "priority": 2,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -730,7 +846,7 @@
         "guidance": "Review and remediate this HIGH severity vulnerability. Consult security best practices and OWASP guidelines for python.requests.security.disabled-cert-validation.disabled-cert-validation. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 30
+        "sla_days": 14
       },
       "tags": [
         "security"
@@ -738,119 +854,6 @@
       "references": [
         "https://stackoverflow.com/questions/41740361/is-it-safe-to-disable-ssl-certificate-verification-in-pythonss-requests-lib"
       ]
-    },
-    {
-      "id": "cf478c565f12087c",
-      "title": "python.flask.security.dangerous-template-string.dangerous-template-string",
-      "description": "Found a template created with string formatting. This is susceptible to server-side template injection and cross-site scripting attacks.",
-      "severity": "HIGH",
-      "source": "SAST",
-      "location": {
-        "file": "Vulnerable_app/app.py",
-        "line_start": 332,
-        "line_end": 341,
-        "url": null,
-        "method": null,
-        "parameter": null
-      },
-      "cwe": [
-        "CWE-96: Improper Neutralization of Directives in Statically Saved Code ('Static Code Injection')"
-      ],
-      "owasp": [
-        "A03:2021 - Injection",
-        "A05:2025 - Injection"
-      ],
-      "confidence": 0.5,
-      "risk_score": 0.69,
-      "priority": 3,
-      "is_false_positive": false,
-      "false_positive_confidence": 0.0,
-      "false_positive_reason": "No false positive indicators",
-      "remediation": {
-        "guidance": "Review and remediate this HIGH severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.dangerous-template-string.dangerous-template-string. Consider the business impact and prioritize accordingly.",
-        "code_example": null,
-        "effort": "MEDIUM",
-        "sla_days": 30
-      },
-      "tags": [
-        "security"
-      ],
-      "references": [
-        "https://nvisium.com/blog/2016/03/09/exploring-ssti-in-flask-jinja2.html",
-        "https://pequalsnp-team.github.io/cheatsheet/flask-jinja2-ssti"
-      ]
-    },
-    {
-      "id": "fe3b8cc74a8bed97",
-      "title": "semgrep-rules.python-path-traversal",
-      "description": "Path traversal risk: validate and normalize user-controlled file paths",
-      "severity": "MEDIUM",
-      "source": "SAST",
-      "location": {
-        "file": "Vulnerable_app/app.py",
-        "line_start": 202,
-        "line_end": 202,
-        "url": null,
-        "method": null,
-        "parameter": null
-      },
-      "cwe": "CWE-22",
-      "owasp": [
-        "A5:2017-Broken Access Control",
-        "A01:2021-Broken Access Control"
-      ],
-      "confidence": 0.7,
-      "risk_score": 0.605,
-      "priority": 3,
-      "is_false_positive": false,
-      "false_positive_confidence": 0.0,
-      "false_positive_reason": "No false positive indicators",
-      "remediation": {
-        "guidance": "Path Traversal Remediation:\n1. Validate and sanitize file paths\n2. Use allowlists for permitted files/directories\n3. Use os.path.basename() to strip directory components\n4. Implement chroot jails or similar containment\n5. Avoid direct file system access when possible",
-        "code_example": "# Vulnerable code:\nwith open(f\"/uploads/{user_file}\") as f:\n    content = f.read()\n\n# Secure code:\nimport os\nsafe_path = os.path.join(\"/uploads\", os.path.basename(user_file))\nif not safe_path.startswith(\"/uploads/\"):\n    raise ValueError(\"Invalid path\")\nwith open(safe_path) as f:\n    content = f.read()",
-        "effort": "MEDIUM",
-        "sla_days": 30
-      },
-      "tags": [
-        "security"
-      ],
-      "references": []
-    },
-    {
-      "id": "58b2e80f09e36ad5",
-      "title": "semgrep-rules.python-path-traversal",
-      "description": "Path traversal risk: validate and normalize user-controlled file paths",
-      "severity": "MEDIUM",
-      "source": "SAST",
-      "location": {
-        "file": "ai-engine/main.py",
-        "line_start": 254,
-        "line_end": 254,
-        "url": null,
-        "method": null,
-        "parameter": null
-      },
-      "cwe": "CWE-22",
-      "owasp": [
-        "A5:2017-Broken Access Control",
-        "A01:2021-Broken Access Control"
-      ],
-      "confidence": 0.7,
-      "risk_score": 0.605,
-      "priority": 3,
-      "is_false_positive": false,
-      "false_positive_confidence": 0.0,
-      "false_positive_reason": "No false positive indicators",
-      "remediation": {
-        "guidance": "Path Traversal Remediation:\n1. Validate and sanitize file paths\n2. Use allowlists for permitted files/directories\n3. Use os.path.basename() to strip directory components\n4. Implement chroot jails or similar containment\n5. Avoid direct file system access when possible",
-        "code_example": "# Vulnerable code:\nwith open(f\"/uploads/{user_file}\") as f:\n    content = f.read()\n\n# Secure code:\nimport os\nsafe_path = os.path.join(\"/uploads\", os.path.basename(user_file))\nif not safe_path.startswith(\"/uploads/\"):\n    raise ValueError(\"Invalid path\")\nwith open(safe_path) as f:\n    content = f.read()",
-        "effort": "MEDIUM",
-        "sla_days": 30
-      },
-      "tags": [
-        "security"
-      ],
-      "references": []
     }
   ],
   "all_findings": [
@@ -875,7 +878,7 @@
         "A07:2025-Authentication Failures"
       ],
       "confidence": 0.7,
-      "risk_score": 0.73,
+      "risk_score": 0.76,
       "priority": 1,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
@@ -912,8 +915,8 @@
         "A01:2025-Broken Access Control"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.51,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -921,7 +924,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for semgrep-rules.python-flask-open-endpoint-no-auth. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -949,8 +952,8 @@
         "A01:2025-Broken Access Control"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.51,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -958,7 +961,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for semgrep-rules.python-flask-open-endpoint-no-auth. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -985,7 +988,7 @@
         "A03:2021-Injection"
       ],
       "confidence": 0.7,
-      "risk_score": 0.68,
+      "risk_score": 0.71,
       "priority": 2,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
@@ -1022,8 +1025,8 @@
         "A01:2025-Broken Access Control"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.51,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -1031,7 +1034,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for semgrep-rules.python-flask-open-endpoint-no-auth. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -1058,7 +1061,7 @@
         "A03:2021-Injection"
       ],
       "confidence": 0.7,
-      "risk_score": 0.68,
+      "risk_score": 0.71,
       "priority": 2,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
@@ -1095,8 +1098,8 @@
         "A01:2025-Broken Access Control"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.51,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -1104,7 +1107,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for semgrep-rules.python-flask-open-endpoint-no-auth. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -1131,7 +1134,7 @@
         "A01:2021-Broken Access Control"
       ],
       "confidence": 0.7,
-      "risk_score": 0.605,
+      "risk_score": 0.635,
       "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
@@ -1168,8 +1171,8 @@
         "A01:2025-Broken Access Control"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.51,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -1177,7 +1180,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for semgrep-rules.python-flask-open-endpoint-no-auth. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -1205,8 +1208,8 @@
         "A01:2025-Broken Access Control"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.51,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -1214,7 +1217,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for semgrep-rules.python-flask-open-endpoint-no-auth. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -1242,7 +1245,7 @@
         "A04:2025-Cryptographic Failures"
       ],
       "confidence": 0.7,
-      "risk_score": 0.555,
+      "risk_score": 0.585,
       "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
@@ -1279,7 +1282,7 @@
         "A05:2025-Injection"
       ],
       "confidence": 0.7,
-      "risk_score": 0.805,
+      "risk_score": 0.835,
       "priority": 1,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
@@ -1316,8 +1319,8 @@
         "A01:2025-Broken Access Control"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.51,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -1325,7 +1328,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for semgrep-rules.python-flask-open-endpoint-no-auth. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -1353,8 +1356,8 @@
         "A08:2025-Software or Data Integrity Failures"
       ],
       "confidence": 0.7,
-      "risk_score": 0.805,
-      "priority": 2,
+      "risk_score": 0.91,
+      "priority": 1,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -1362,7 +1365,7 @@
         "guidance": "Insecure Deserialization Remediation:\n1. Avoid deserializing untrusted data\n2. Use safe serialization formats (JSON instead of pickle)\n3. Implement integrity checks (HMAC signatures)\n4. Use allowlists for deserializable classes\n5. Run deserialization in sandboxed environments",
         "code_example": "# Vulnerable code:\nimport pickle\ndata = pickle.loads(user_input)\n\n# Secure code:\nimport json\ndata = json.loads(user_input)",
         "effort": "HIGH",
-        "sla_days": 14
+        "sla_days": 7
       },
       "tags": [
         "security"
@@ -1390,7 +1393,7 @@
         "A04:2025-Cryptographic Failures"
       ],
       "confidence": 0.7,
-      "risk_score": 0.365,
+      "risk_score": 0.395,
       "priority": 4,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
@@ -1427,8 +1430,8 @@
         "A01:2025-Broken Access Control"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.51,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -1436,7 +1439,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for semgrep-rules.python-flask-open-endpoint-no-auth. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -1463,8 +1466,8 @@
         "A05:2025-Injection"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.51,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -1472,7 +1475,7 @@
         "guidance": "SSRF Remediation:\n1. Validate and whitelist allowed URLs/domains\n2. Disable redirects in HTTP clients\n3. Use network segmentation to limit internal access\n4. Implement URL parsing and validation\n5. Block requests to private IP ranges",
         "code_example": "# Vulnerable code:\nresponse = requests.get(user_url)\n\n# Secure code:\nfrom urllib.parse import urlparse\nallowed_domains = ['api.example.com']\nparsed = urlparse(user_url)\nif parsed.netloc not in allowed_domains:\n    raise ValueError(\"Invalid domain\")\nresponse = requests.get(user_url, allow_redirects=False)",
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -1499,7 +1502,7 @@
         "A03:2021-Injection"
       ],
       "confidence": 0.7,
-      "risk_score": 0.68,
+      "risk_score": 0.71,
       "priority": 2,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
@@ -1535,8 +1538,8 @@
         "A02:2025-Security Misconfiguration"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.51,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -1544,7 +1547,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for semgrep-rules.python-flask-debug-enabled. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "LOW",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -1571,7 +1574,7 @@
         "A01:2021-Broken Access Control"
       ],
       "confidence": 0.7,
-      "risk_score": 0.605,
+      "risk_score": 0.635,
       "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
@@ -1607,7 +1610,7 @@
         "A01:2021-Broken Access Control"
       ],
       "confidence": 0.7,
-      "risk_score": 0.605,
+      "risk_score": 0.635,
       "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
@@ -1644,7 +1647,7 @@
         "A04:2025-Cryptographic Failures"
       ],
       "confidence": 0.7,
-      "risk_score": 0.555,
+      "risk_score": 0.585,
       "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
@@ -1680,7 +1683,7 @@
         "A01:2021-Broken Access Control"
       ],
       "confidence": 0.7,
-      "risk_score": 0.605,
+      "risk_score": 0.635,
       "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
@@ -1717,7 +1720,7 @@
         "A04:2025-Cryptographic Failures"
       ],
       "confidence": 0.7,
-      "risk_score": 0.555,
+      "risk_score": 0.585,
       "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
@@ -1753,7 +1756,7 @@
         "A01:2021-Broken Access Control"
       ],
       "confidence": 0.7,
-      "risk_score": 0.605,
+      "risk_score": 0.635,
       "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
@@ -1790,7 +1793,7 @@
         "A03:2025-Software Supply Chain Failures"
       ],
       "confidence": 0.7,
-      "risk_score": 0.365,
+      "risk_score": 0.395,
       "priority": 4,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
@@ -1828,8 +1831,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.5,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.51,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -1837,7 +1840,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.audit.render-template-string.render-template-string. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -1869,8 +1872,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.76,
+      "priority": 2,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -1878,7 +1881,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.django.security.injection.sql.sql-injection-using-db-cursor-execute.sql-injection-db-cursor-execute. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 14
       },
       "tags": [
         "security"
@@ -1910,8 +1913,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.76,
+      "priority": 2,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -1919,7 +1922,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.django.security.injection.sql.sql-injection-using-db-cursor-execute.sql-injection-db-cursor-execute. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 14
       },
       "tags": [
         "security"
@@ -1951,8 +1954,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.7,
-      "risk_score": 0.69,
-      "priority": 3,
+      "risk_score": 0.72,
+      "priority": 2,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -1960,7 +1963,7 @@
         "guidance": "Review and remediate this HIGH severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.injection.tainted-sql-string.tainted-sql-string. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 30
+        "sla_days": 14
       },
       "tags": [
         "security"
@@ -1993,8 +1996,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.5,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.51,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2002,7 +2005,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.audit.render-template-string.render-template-string. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -2033,8 +2036,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.5,
-      "risk_score": 0.69,
-      "priority": 3,
+      "risk_score": 0.72,
+      "priority": 2,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2042,7 +2045,7 @@
         "guidance": "Review and remediate this HIGH severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.dangerous-template-string.dangerous-template-string. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 30
+        "sla_days": 14
       },
       "tags": [
         "security"
@@ -2075,8 +2078,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.635,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2084,7 +2087,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.django.security.injection.raw-html-format.raw-html-format. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -2117,8 +2120,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.635,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2126,7 +2129,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.injection.raw-html-concat.raw-html-format. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -2157,8 +2160,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.5,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.51,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2166,7 +2169,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.audit.render-template-string.render-template-string. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -2197,8 +2200,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.5,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.51,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2206,7 +2209,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.audit.render-template-string.render-template-string. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -2238,8 +2241,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.9,
-      "risk_score": 0.69,
-      "priority": 3,
+      "risk_score": 0.835,
+      "priority": 2,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2247,7 +2250,7 @@
         "guidance": "Review and remediate this HIGH severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.injection.subprocess-injection.subprocess-injection. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 30
+        "sla_days": 14
       },
       "tags": [
         "security"
@@ -2279,8 +2282,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.7,
-      "risk_score": 0.69,
-      "priority": 3,
+      "risk_score": 0.835,
+      "priority": 2,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2288,7 +2291,7 @@
         "guidance": "Review and remediate this HIGH severity vulnerability. Consult security best practices and OWASP guidelines for python.lang.security.dangerous-subprocess-use.dangerous-subprocess-use. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 30
+        "sla_days": 14
       },
       "tags": [
         "security"
@@ -2323,8 +2326,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.7,
-      "risk_score": 0.69,
-      "priority": 3,
+      "risk_score": 0.835,
+      "priority": 2,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2332,7 +2335,7 @@
         "guidance": "Review and remediate this HIGH severity vulnerability. Consult security best practices and OWASP guidelines for python.lang.security.audit.subprocess-shell-true.subprocess-shell-true. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 30
+        "sla_days": 14
       },
       "tags": [
         "security"
@@ -2364,8 +2367,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.5,
-      "risk_score": 0.69,
-      "priority": 3,
+      "risk_score": 0.72,
+      "priority": 2,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2373,7 +2376,7 @@
         "guidance": "Review and remediate this HIGH severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.dangerous-template-string.dangerous-template-string. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 30
+        "sla_days": 14
       },
       "tags": [
         "security"
@@ -2406,8 +2409,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.635,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2415,7 +2418,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.django.security.injection.raw-html-format.raw-html-format. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -2448,8 +2451,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.635,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2457,7 +2460,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.injection.raw-html-concat.raw-html-format. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -2488,8 +2491,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.5,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.51,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2497,7 +2500,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.audit.render-template-string.render-template-string. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -2528,8 +2531,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.5,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.51,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2537,7 +2540,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.audit.render-template-string.render-template-string. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -2569,8 +2572,8 @@
         "A01:2025 - Broken Access Control"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.635,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2578,7 +2581,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.django.security.injection.path-traversal.path-traversal-open.path-traversal-open. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -2609,8 +2612,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.51,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2618,7 +2621,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.django.security.injection.request-data-write.request-data-write. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -2650,8 +2653,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.635,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2659,7 +2662,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.audit.directly-returned-format-string.directly-returned-format-string. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -2690,8 +2693,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.5,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.51,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2699,7 +2702,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.audit.render-template-string.render-template-string. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -2730,8 +2733,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.5,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.51,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2739,7 +2742,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.audit.render-template-string.render-template-string. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -2771,8 +2774,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.635,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2780,7 +2783,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.audit.directly-returned-format-string.directly-returned-format-string. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -2812,8 +2815,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.76,
+      "priority": 2,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2821,7 +2824,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.django.security.injection.sql.sql-injection-using-db-cursor-execute.sql-injection-db-cursor-execute. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 14
       },
       "tags": [
         "security"
@@ -2853,8 +2856,8 @@
         "A04:2025 - Cryptographic Failures"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.585,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2862,7 +2865,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.lang.security.insecure-hash-algorithms-md5.insecure-hash-algorithm-md5. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -2897,8 +2900,8 @@
         "A04:2025 - Cryptographic Failures"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.585,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2906,7 +2909,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.lang.security.audit.md5-used-as-password.md5-used-as-password. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -2943,8 +2946,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.7,
-      "risk_score": 0.69,
-      "priority": 3,
+      "risk_score": 0.72,
+      "priority": 2,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2952,7 +2955,7 @@
         "guidance": "Review and remediate this HIGH severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.injection.tainted-sql-string.tainted-sql-string. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 30
+        "sla_days": 14
       },
       "tags": [
         "security"
@@ -2985,8 +2988,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.5,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.51,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -2994,7 +2997,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.audit.render-template-string.render-template-string. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -3026,16 +3029,16 @@
         "A08:2025 - Software or Data Integrity Failures"
       ],
       "confidence": 0.5,
-      "risk_score": 0.69,
-      "priority": 3,
+      "risk_score": 0.91,
+      "priority": 1,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
       "remediation": {
-        "guidance": "Review and remediate this HIGH severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.insecure-deserialization.insecure-deserialization. Consider the business impact and prioritize accordingly.",
+        "guidance": "Review and remediate this CRITICAL severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.insecure-deserialization.insecure-deserialization. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 30
+        "sla_days": 7
       },
       "tags": [
         "security"
@@ -3067,16 +3070,16 @@
         "A08:2025 - Software or Data Integrity Failures"
       ],
       "confidence": 0.5,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.91,
+      "priority": 1,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
       "remediation": {
-        "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.lang.security.deserialization.pickle.avoid-pickle. Consider the business impact and prioritize accordingly.",
+        "guidance": "Review and remediate this CRITICAL severity vulnerability. Consult security best practices and OWASP guidelines for python.lang.security.deserialization.pickle.avoid-pickle. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 7
       },
       "tags": [
         "security"
@@ -3108,8 +3111,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.635,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -3117,7 +3120,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.audit.directly-returned-format-string.directly-returned-format-string. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -3148,7 +3151,7 @@
         "A01:2025 - Broken Access Control"
       ],
       "confidence": 0.7,
-      "risk_score": 0.69,
+      "risk_score": 0.66,
       "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
@@ -3188,7 +3191,7 @@
         "A01:2025 - Broken Access Control"
       ],
       "confidence": 0.7,
-      "risk_score": 0.69,
+      "risk_score": 0.66,
       "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
@@ -3229,8 +3232,8 @@
         "A07:2025 - Authentication Failures"
       ],
       "confidence": 0.5,
-      "risk_score": 0.69,
-      "priority": 3,
+      "risk_score": 0.72,
+      "priority": 2,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -3238,7 +3241,7 @@
         "guidance": "Review and remediate this HIGH severity vulnerability. Consult security best practices and OWASP guidelines for python.requests.security.disabled-cert-validation.disabled-cert-validation. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 30
+        "sla_days": 14
       },
       "tags": [
         "security"
@@ -3269,8 +3272,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.5,
-      "risk_score": 0.69,
-      "priority": 3,
+      "risk_score": 0.72,
+      "priority": 2,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -3278,7 +3281,7 @@
         "guidance": "Review and remediate this HIGH severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.dangerous-template-string.dangerous-template-string. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 30
+        "sla_days": 14
       },
       "tags": [
         "security"
@@ -3310,8 +3313,8 @@
         "A05:2025 - Injection"
       ],
       "confidence": 0.5,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.51,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -3319,7 +3322,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.audit.render-template-string.render-template-string. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -3350,8 +3353,8 @@
         "A01:2025 - Broken Access Control"
       ],
       "confidence": 0.9,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.51,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -3359,7 +3362,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.flask.security.audit.app-run-param-config.avoid_app_run_with_bad_host. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -3428,8 +3431,8 @@
         "A04:2025 - Cryptographic Failures"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.585,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -3437,7 +3440,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.lang.security.insecure-hash-algorithms-md5.insecure-hash-algorithm-md5. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -3472,8 +3475,8 @@
         "A04:2025 - Cryptographic Failures"
       ],
       "confidence": 0.7,
-      "risk_score": 0.48,
-      "priority": 4,
+      "risk_score": 0.585,
+      "priority": 3,
       "is_false_positive": false,
       "false_positive_confidence": 0.0,
       "false_positive_reason": "No false positive indicators",
@@ -3481,7 +3484,7 @@
         "guidance": "Review and remediate this MEDIUM severity vulnerability. Consult security best practices and OWASP guidelines for python.lang.security.insecure-hash-algorithms-md5.insecure-hash-algorithm-md5. Consider the business impact and prioritize accordingly.",
         "code_example": null,
         "effort": "MEDIUM",
-        "sla_days": 60
+        "sla_days": 30
       },
       "tags": [
         "security"
@@ -3491,6 +3494,146 @@
         "https://www.trendmicro.com/vinfo/us/security/news/vulnerabilities-and-exploits/sha-1-collision-signals-the-end-of-the-algorithm-s-viability",
         "http://2012.sharcs.org/slides/stevens.pdf",
         "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
+      ]
+    },
+    {
+      "id": "86595c99f9f3fc1d",
+      "title": "SQL Injection",
+      "description": "SQL injection may be possible.",
+      "severity": "CRITICAL",
+      "source": "DAST",
+      "location": {
+        "file": "",
+        "line_start": null,
+        "line_end": null,
+        "url": "http://localhost:5000/login",
+        "method": "POST",
+        "parameter": "username"
+      },
+      "cwe": "CWE-89",
+      "owasp": "A03:2021-Injection",
+      "confidence": 0.7,
+      "risk_score": 1.0,
+      "priority": 1,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "SQL Injection Remediation:\n1. Use parameterized queries (prepared statements) instead of string concatenation\n2. Use ORM frameworks with built-in protection\n3. Implement input validation and sanitization\n4. Apply principle of least privilege for database accounts\n5. Use stored procedures with parameterized inputs",
+        "code_example": "# Vulnerable code:\nquery = f\"SELECT * FROM users WHERE id = {user_id}\"\ncursor.execute(query)\n\n# Secure code:\nquery = \"SELECT * FROM users WHERE id = ?\"\ncursor.execute(query, (user_id,))",
+        "effort": "MEDIUM",
+        "sla_days": 7
+      },
+      "tags": [
+        "40018"
+      ],
+      "references": [
+        "https://owasp.org/www-community/attacks/SQL_Injection"
+      ]
+    },
+    {
+      "id": "004b1d8b6a64f4a1",
+      "title": "Cross Site Scripting (Reflected)",
+      "description": "Cross-site Scripting (XSS) is possible.",
+      "severity": "CRITICAL",
+      "source": "DAST",
+      "location": {
+        "file": "",
+        "line_start": null,
+        "line_end": null,
+        "url": "http://localhost:5000/search",
+        "method": "POST",
+        "parameter": "search"
+      },
+      "cwe": "CWE-79",
+      "owasp": "A03:2021-Injection",
+      "confidence": 0.7,
+      "risk_score": 0.83,
+      "priority": 2,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "Cross-Site Scripting (XSS) Remediation:\n1. Enable auto-escaping in template engines\n2. Use Content Security Policy (CSP) headers\n3. Sanitize user input before rendering\n4. Use framework-provided escaping functions\n5. Validate and encode output based on context (HTML, JavaScript, URL)",
+        "code_example": "# Vulnerable code:\nreturn render_template_string(f\"<h1>Hello {user_input}</h1>\")\n\n# Secure code:\nfrom markupsafe import escape\nreturn render_template_string(f\"<h1>Hello {escape(user_input)}</h1>\")",
+        "effort": "MEDIUM",
+        "sla_days": 14
+      },
+      "tags": [
+        "40012"
+      ],
+      "references": [
+        "https://owasp.org/www-community/attacks/xss/"
+      ]
+    },
+    {
+      "id": "e5a0a9bbcce82b6f",
+      "title": "Remote OS Command Injection",
+      "description": "Command injection may be possible.",
+      "severity": "CRITICAL",
+      "source": "DAST",
+      "location": {
+        "file": "",
+        "line_start": null,
+        "line_end": null,
+        "url": "http://localhost:5000/ping",
+        "method": "POST",
+        "parameter": "host"
+      },
+      "cwe": "CWE-78",
+      "owasp": "A03:2021-Injection",
+      "confidence": 0.7,
+      "risk_score": 0.955,
+      "priority": 1,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "Command Injection Remediation:\n1. Avoid shell=True in subprocess calls\n2. Use subprocess with argument lists instead of shell commands\n3. Validate and whitelist allowed commands\n4. Use libraries instead of shell commands when possible\n5. Implement strict input validation",
+        "code_example": "# Vulnerable code:\nsubprocess.call(f\"ls {user_path}\", shell=True)\n\n# Secure code:\nsubprocess.call([\"ls\", user_path])",
+        "effort": "MEDIUM",
+        "sla_days": 7
+      },
+      "tags": [
+        "90020"
+      ],
+      "references": [
+        "https://owasp.org/www-project-web-security-testing-guide/"
+      ]
+    },
+    {
+      "id": "3f39c2cfc0d22f48",
+      "title": "Absence of Anti-CSRF Tokens",
+      "description": "No Anti-CSRF tokens were found in a HTML submission form.",
+      "severity": "HIGH",
+      "source": "DAST",
+      "location": {
+        "file": "",
+        "line_start": null,
+        "line_end": null,
+        "url": "http://localhost:5000/transfer",
+        "method": "POST",
+        "parameter": ""
+      },
+      "cwe": "CWE-352",
+      "owasp": "A01:2021-Broken Access Control",
+      "confidence": 0.7,
+      "risk_score": 0.755,
+      "priority": 2,
+      "is_false_positive": false,
+      "false_positive_confidence": 0.0,
+      "false_positive_reason": "No false positive indicators",
+      "remediation": {
+        "guidance": "CSRF Remediation:\n1. Implement CSRF tokens for state-changing operations\n2. Use SameSite cookie attribute\n3. Verify Origin and Referer headers\n4. Use framework-provided CSRF protection\n5. Require re-authentication for sensitive operations",
+        "code_example": "# Vulnerable code:\n@app.route('/transfer', methods=['POST'])\ndef transfer():\n    amount = request.form['amount']\n    process_transfer(amount)\n\n# Secure code:\nfrom flask_wtf.csrf import CSRFProtect\ncsrf = CSRFProtect(app)\n\n@app.route('/transfer', methods=['POST'])\n@csrf.protect\ndef transfer():\n    amount = request.form['amount']\n    process_transfer(amount)",
+        "effort": "MEDIUM",
+        "sla_days": 14
+      },
+      "tags": [
+        "10202"
+      ],
+      "references": [
+        "https://owasp.org/www-community/attacks/csrf"
       ]
     }
   ]
