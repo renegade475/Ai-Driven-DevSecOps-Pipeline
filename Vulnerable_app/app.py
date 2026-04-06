@@ -22,6 +22,31 @@ DATABASE_PASSWORD = "admin123"  # Hardcoded database password
 # CWE-489: Debug mode enabled
 DEBUG_MODE = True
 
+# CWE-614: Insecure cookie configuration - no Secure, HttpOnly, or SameSite flags
+app.config['SESSION_COOKIE_SECURE'] = False
+app.config['SESSION_COOKIE_HTTPONLY'] = False
+app.config['SESSION_COOKIE_SAMESITE'] = None
+
+# In-memory store for comments (stored XSS demo)
+comments_store = []
+
+
+@app.after_request
+def remove_security_headers(response):
+    """CWE-693: Intentionally missing security headers for DAST detection"""
+    # Leak server version info
+    response.headers['Server'] = 'Flask/2.3.2 Python/3.11.0'
+    response.headers['X-Powered-By'] = 'Flask'
+    # Explicitly remove any security headers
+    response.headers.pop('X-Content-Type-Options', None)
+    response.headers.pop('X-Frame-Options', None)
+    response.headers.pop('Content-Security-Policy', None)
+    response.headers.pop('Strict-Transport-Security', None)
+    response.headers.pop('X-XSS-Protection', None)
+    response.headers.pop('Referrer-Policy', None)
+    response.headers.pop('Permissions-Policy', None)
+    return response
+
 # Initialize database
 def init_db():
     conn = sqlite3.connect('vulnerable_app.db')
@@ -69,6 +94,11 @@ def index():
                 <li><a href="/calculate">Calculator (CRITICAL)</a></li>
                 <li><a href="/deserialize">Deserializer (CRITICAL)</a></li>
                 <li><a href="/admin">Admin Panel</a></li>
+                <li><a href="/profile?name=Guest">View Profile</a></li>
+                <li><a href="/comments">Comments Board</a></li>
+                <li><a href="/register">Register</a></li>
+                <li><a href="/token">Generate Token</a></li>
+                <li><a href="/info">Server Info</a></li>
             </ul>
         </body>
     </html>
@@ -413,6 +443,89 @@ def dashboard():
 def logout():
     session.clear()
     return redirect('/')
+
+
+# CWE-79: GET-based Reflected XSS (easy for ZAP spider to discover)
+@app.route('/profile')
+def profile():
+    name = request.args.get('name', 'Guest')
+    # Vulnerable: Directly reflecting GET parameter without escaping
+    html = f'''
+    <html>
+        <head><title>Profile - {name}</title></head>
+        <body>
+            <h2>User Profile</h2>
+            <p>Welcome, {name}!</p>
+            <p>This is your profile page.</p>
+            <form method="GET" action="/profile">
+                Change name: <input name="name" value="{name}">
+                <input type="submit" value="Update">
+            </form>
+            <a href="/">Home</a>
+        </body>
+    </html>
+    '''
+    return render_template_string(html)
+
+
+# CWE-79: Stored XSS via comments
+@app.route('/comments', methods=['GET', 'POST'])
+def comments():
+    if request.method == 'POST':
+        author = request.form.get('author', 'Anonymous')
+        comment = request.form.get('comment', '')
+        # Vulnerable: Storing and displaying user input without sanitization
+        comments_store.append({'author': author, 'comment': comment})
+    
+    comments_html = ''
+    for c in comments_store:
+        # Vulnerable: Direct rendering without escaping
+        comments_html += f'<div class="comment"><b>{c["author"]}</b>: {c["comment"]}</div>'
+    
+    html = f'''
+    <html>
+        <head><title>Comments</title></head>
+        <body>
+            <h2>Comments Board</h2>
+            <form method="POST">
+                Name: <input name="author" value="Anonymous"><br>
+                Comment: <textarea name="comment"></textarea><br>
+                <input type="submit" value="Post Comment">
+            </form>
+            <hr>
+            <h3>Recent Comments</h3>
+            {comments_html}
+            <p><a href="/">Home</a></p>
+        </body>
+    </html>
+    '''
+    return render_template_string(html)
+
+
+# CWE-200: Information Exposure - Server info endpoint
+@app.route('/info')
+def server_info():
+    # Vulnerable: Exposing sensitive server information
+    import sys
+    import platform
+    html = f'''
+    <html>
+        <head><title>Server Info</title></head>
+        <body>
+            <h2>Server Information</h2>
+            <table border="1">
+                <tr><td>Python Version</td><td>{sys.version}</td></tr>
+                <tr><td>Platform</td><td>{platform.platform()}</td></tr>
+                <tr><td>Architecture</td><td>{platform.machine()}</td></tr>
+                <tr><td>Debug Mode</td><td>{DEBUG_MODE}</td></tr>
+                <tr><td>Secret Key</td><td>{app.secret_key}</td></tr>
+                <tr><td>Database Password</td><td>{DATABASE_PASSWORD}</td></tr>
+            </table>
+            <a href="/">Home</a>
+        </body>
+    </html>
+    '''
+    return render_template_string(html)
 
 
 if __name__ == '__main__':

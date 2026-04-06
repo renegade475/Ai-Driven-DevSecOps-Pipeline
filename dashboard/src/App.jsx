@@ -193,16 +193,18 @@ function App() {
         if (!data) return;
 
         const csv = [
-            ['ID', 'Title', 'Severity', 'Risk Score', 'CWE', 'OWASP', 'File', 'Line', 'SLA Days'].join(','),
+            ['ID', 'Title', 'Severity', 'Source', 'Risk Score', 'CWE', 'OWASP', 'Location', 'SLA Days'].join(','),
             ...filteredVulns.map(v => [
                 v.id,
                 `"${v.title}"`,
                 v.severity,
+                v.source || '',
                 v.risk_score,
                 v.cwe || '',
                 v.owasp || '',
-                v.location?.file || '',
-                v.location?.line_start || '',
+                v.source === 'DAST'
+                    ? `"${v.location?.method || 'GET'} ${v.location?.url || ''}"`
+                    : `"${v.location?.file || ''}:${v.location?.line_start || ''}"`,
                 v.remediation?.sla_days || ''
             ].join(','))
         ].join('\n');
@@ -497,6 +499,7 @@ function App() {
                                     <TableRow>
                                         <TableCell>Priority</TableCell>
                                         <TableCell>Title</TableCell>
+                                        <TableCell>Source</TableCell>
                                         <TableCell>Severity</TableCell>
                                         <TableCell>Risk Score</TableCell>
                                         <TableCell>CWE</TableCell>
@@ -535,6 +538,16 @@ function App() {
                                             </TableCell>
                                             <TableCell>
                                                 <Chip
+                                                    label={vuln.source || 'SAST'}
+                                                    size="small"
+                                                    sx={{
+                                                        backgroundColor: vuln.source === 'DAST' ? '#6366f1' : '#0ea5e9',
+                                                        fontWeight: 'bold'
+                                                    }}
+                                                />
+                                            </TableCell>
+                                            <TableCell>
+                                                <Chip
                                                     label={vuln.severity}
                                                     size="small"
                                                     sx={{
@@ -561,7 +574,10 @@ function App() {
                                             </TableCell>
                                             <TableCell>
                                                 <Typography variant="body2" sx={{ color: '#ffffff' }}>
-                                                    {vuln.location?.file}:{vuln.location?.line_start}
+                                                    {vuln.source === 'DAST'
+                                                        ? `${vuln.location?.method || 'GET'} ${vuln.location?.url || ''}${vuln.location?.parameter ? ' [' + vuln.location.parameter + ']' : ''}`
+                                                        : `${vuln.location?.file || ''}:${vuln.location?.line_start || ''}`
+                                                    }
                                                 </Typography>
                                             </TableCell>
                                             <TableCell>
